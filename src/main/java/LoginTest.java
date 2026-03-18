@@ -1,6 +1,7 @@
 import io.appium.java_client.AppiumDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+
 import java.time.Duration;
 
 public class LoginTest {
@@ -22,7 +23,7 @@ public class LoginTest {
         loginPage.login("00001879", "1");
 
         // Give the app a moment to navigate after tapping "Log In"
-        Thread.sleep(4000);
+        Thread.sleep(15000);
 
         // Clean up the Appium session
         driver.quit();

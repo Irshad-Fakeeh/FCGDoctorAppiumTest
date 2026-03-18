@@ -9,6 +9,8 @@ import java.net.URL;
 public final class AppiumDriverFactory {
 
     private static final String APPIUM_SERVER_URL = "http://127.0.0.1:4723";
+    private static final String ANDROID_APP_PACKAGE = "com.dsfh.yardoctorapp.beta";
+    private static final String ANDROID_APP_ACTIVITY = "com.dsfh.yardoctorapp.MainActivity";
 
     private AppiumDriverFactory() {
         // Utility class
@@ -27,9 +29,9 @@ public final class AppiumDriverFactory {
 
         UiAutomator2Options options = new UiAutomator2Options();
         options.setPlatformName("Android");
-        options.setDeviceName("emulator-5554");
-        options.setAppPackage("com.dsfh.yardoctorapp.beta");
-        options.setAppActivity("com.dsfh.yardoctorapp.MainActivity");
+        options.setDeviceName("9d7c67b2");
+        options.setAppPackage(ANDROID_APP_PACKAGE);
+        options.setAppActivity(ANDROID_APP_ACTIVITY);
         options.setNoReset(false);
         return new AndroidDriver(new URL(APPIUM_SERVER_URL), options);
     }
