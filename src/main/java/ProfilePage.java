@@ -213,4 +213,84 @@ public class ProfilePage {
             return false;
         }
     }
+
+    /**
+     * Performs the full profile test sequence: image, QR, privacy, language, screen mode.
+     */
+    public void performFullProfileTest() throws InterruptedException {
+        // Click the profile image in the profile screen
+        clickProfileImage();
+
+        System.out.println("Waiting for image dialog to open...");
+        Thread.sleep(3000); // Wait for dialog
+
+        // Close the profile image dialog
+        closeProfileImageDialog();
+
+        System.out.println("Waiting after closing image dialog...");
+        Thread.sleep(2000);
+
+        // Click the QR code in the profile screen
+        clickQRCode();
+
+        System.out.println("Waiting for QR dialog to open...");
+        Thread.sleep(3000); // Wait for dialog
+
+        // Close the QR dialog
+        closeQRDialog();
+
+        System.out.println("Waiting after closing QR dialog...");
+        Thread.sleep(2000);
+
+        // Click the Privacy Policy in the profile screen
+        clickPrivacyPolicy();
+
+        System.out.println("Clicked Privacy Policy. Pressing back to return to profile...");
+        Thread.sleep(3000); // Wait for privacy policy to open
+
+        // Press back to close privacy policy and return to profile
+        ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+
+        System.out.println("Waiting after back from privacy policy...");
+        Thread.sleep(2000);
+
+        // Click the Change Language in the profile screen
+        clickChangeLanguage();
+
+        System.out.println("Opened language dialog. Selecting Arabic...");
+        Thread.sleep(2000);
+
+        // Close the language dialog
+        closeLanguageDialog();
+
+        System.out.println("Closed dialog. Waiting...");
+        Thread.sleep(2000);
+
+        // Click Screen Mode
+        clickScreenMode();
+
+        System.out.println("Opened screen mode dialog. Selecting Dark...");
+        Thread.sleep(2000);
+
+        // Select Dark
+        selectDarkTheme();
+
+        System.out.println("Selected Dark. Selecting Device...");
+        Thread.sleep(2000);
+
+        clickScreenMode();
+
+        // Select Device
+        selectDeviceTheme();
+
+        System.out.println("Selected Device. Closing dialog...");
+        Thread.sleep(2000);
+
+        // Close the screen mode dialog
+        closeScreenModeDialog();
+
+        System.out.println("Closed screen mode dialog. Session remains open for further inspection.");
+        // Keep the session open - remove driver.quit() to prevent closing
+
+    }
 }
