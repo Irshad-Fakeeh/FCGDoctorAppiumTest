@@ -47,6 +47,11 @@ public class LoginPage {
                 )
         );
         username.click();
+        try {
+            Thread.sleep(1000); // Wait for keyboard
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         username.clear();
         username.sendKeys(employeeId);
 
@@ -56,6 +61,11 @@ public class LoginPage {
                 )
         );
         password.click();
+        try {
+            Thread.sleep(1000); // Wait for keyboard
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         password.clear();
         password.sendKeys(passwordText);
 

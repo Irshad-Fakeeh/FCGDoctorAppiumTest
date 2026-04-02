@@ -1,3 +1,7 @@
 AppiumDriverFactory.class
+NotificationsTabTest.class
 LoginPage.class
+HomePage.class
 LoginTest.class
+ProfilePage.class
+ProfileNavigationTest.class

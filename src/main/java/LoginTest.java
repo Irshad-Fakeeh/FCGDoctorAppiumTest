@@ -1,6 +1,9 @@
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+import java.util.Set;
 
 import java.time.Duration;
 
@@ -9,11 +12,13 @@ public class LoginTest {
     public static void main(String[] args) throws Exception {
         String platform = args.length > 0 ? args[0].trim().toLowerCase() : "android";
 
+        System.out.println("Connecting to Appium server...");
         // Create the platform-specific Appium session
         AppiumDriver driver = AppiumDriverFactory.createDriver(platform);
 
+        System.out.println("Session started successfully! Performing login actions...");
         // Shared wait helper used by page objects
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
         // Page object encapsulates the login-screen actions
         LoginPage loginPage = new LoginPage(driver, wait, "ios".equals(platform));
@@ -22,10 +27,59 @@ public class LoginTest {
         loginPage.handlePermissionDialogIfPresent();
         loginPage.login("00001879", "1");
 
+        System.out.println("Waiting for app navigation...");
         // Give the app a moment to navigate after tapping "Log In"
         Thread.sleep(15000);
 
-        // Clean up the Appium session
-        driver.quit();
+        // Now on homepage, click notifications
+        HomePage homePage = new HomePage(driver, wait, "ios".equals(platform));
+        homePage.clickProfileAvatar();
+
+        System.out.println("Waiting for profile page to load...");
+        Thread.sleep(5000); // Wait for navigation
+
+        // Now on profile page
+        ProfilePage profilePage = new ProfilePage(driver, wait, "ios".equals(platform));
+
+        // Click the profile image in the profile screen
+        profilePage.clickProfileImage();
+
+        System.out.println("Waiting for image dialog to open...");
+        Thread.sleep(3000); // Wait for dialog
+
+        // Close the profile image dialog
+        profilePage.closeProfileImageDialog();
+
+        System.out.println("Waiting after closing image dialog...");
+        Thread.sleep(2000);
+
+        // Click the QR code in the profile screen
+        profilePage.clickQRCode();
+
+        System.out.println("Waiting for QR dialog to open...");
+        Thread.sleep(3000); // Wait for dialog
+
+        // Close the QR dialog
+        profilePage.closeQRDialog();
+
+        System.out.println("Waiting after closing QR dialog...");
+        Thread.sleep(2000);
+
+        // Click the Privacy Policy in the profile screen
+        profilePage.clickPrivacyPolicy();
+
+        System.out.println("Clicked Privacy Policy. Pressing back to return to profile...");
+        Thread.sleep(3000); // Wait for privacy policy to open
+
+        // Press back to close privacy policy and return to profile
+        ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+
+        System.out.println("Pressed back. Session remains open for further inspection.");
+        // Keep the session open - remove driver.quit() to prevent closing
+
+        
+        Thread.sleep(5000);
+
+
     }
 }
