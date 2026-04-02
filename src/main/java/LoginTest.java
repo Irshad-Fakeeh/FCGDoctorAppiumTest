@@ -74,7 +74,54 @@ public class LoginTest {
         // Press back to close privacy policy and return to profile
         ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
 
-        System.out.println("Pressed back. Session remains open for further inspection.");
+        System.out.println("Waiting after back from privacy policy...");
+        Thread.sleep(2000);
+
+        // Click the Change Language in the profile screen
+        profilePage.clickChangeLanguage();
+
+        System.out.println("Opened language dialog. Selecting Arabic...");
+        Thread.sleep(2000);
+
+        // Select Arabic
+        // try {
+        //     profilePage.selectArabic();
+        //     System.out.println("Selected Arabic. Closing dialog...");
+        // } catch (Exception e) {
+        //     System.out.println("Failed to select Arabic: " + e.getMessage());
+        //     System.out.println("Closing dialog anyway...");
+        // }
+
+        // Close the language dialog
+        profilePage.closeLanguageDialog();
+
+        System.out.println("Closed dialog. Waiting...");
+        Thread.sleep(2000);
+
+        // Click Screen Mode
+        profilePage.clickScreenMode();
+
+        System.out.println("Opened screen mode dialog. Selecting Dark...");
+        Thread.sleep(2000);
+
+        // Select Dark
+        profilePage.selectDarkTheme();
+
+        System.out.println("Selected Dark. Selecting Device...");
+        Thread.sleep(2000);
+
+        profilePage.clickScreenMode();
+
+        // Select Device
+        profilePage.selectDeviceTheme();
+
+        System.out.println("Selected Device. Closing dialog...");
+        Thread.sleep(2000);
+
+        // Close the screen mode dialog
+        profilePage.closeScreenModeDialog();
+
+        System.out.println("Closed screen mode dialog. Session remains open for further inspection.");
         // Keep the session open - remove driver.quit() to prevent closing
 
         

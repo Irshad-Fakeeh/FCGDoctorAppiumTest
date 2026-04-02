@@ -7,6 +7,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ProfilePage {
 
@@ -61,6 +63,108 @@ public class ProfilePage {
      * Closes the QR code dialog by pressing the back key.
      */
     public void closeQRDialog() {
+        if (!ios) {
+            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+        } else {
+            driver.navigate().back();
+        }
+    }
+
+    /**
+     * Clicks the Change Language item in the profile screen to toggle between English and Arabic.
+     */
+    public void clickChangeLanguage() {
+         By locator = By.xpath(
+        "//*[contains(@content-desc,'change_language') or contains(@content-desc,'Change Language')]"
+    );
+        WebElement changeLanguage = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        changeLanguage.click();
+    }
+
+    /**
+     * Closes the language dialog by pressing the back key.
+     */
+    public void closeLanguageDialog() {
+        if (!ios) {
+            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+        } else {
+            driver.navigate().back();
+        }
+    }
+
+    /**
+     * Selects Arabic from the language dialog.
+     */
+    public void selectArabic() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("arabic")
+                : By.xpath("//*[contains(@content-desc,'العربية')]");
+
+        try {
+            WebElement arabic = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            arabic.click();
+        } catch (Exception e) {
+            System.out.println("Failed to find Arabic element. Saving page source to page_source.xml");
+            try (FileWriter fw = new FileWriter("page_source.xml")) {
+                fw.write(driver.getPageSource());
+            } catch (IOException io) {
+                System.out.println("Failed to save page source: " + io.getMessage());
+            }
+            throw e;
+        }
+    }
+
+    /**
+     * Selects English from the language dialog.
+     */
+    public void selectEnglish() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("english")
+                : By.xpath("//*[contains(@content-desc,'English')]");
+
+        WebElement english = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        english.click();
+    }
+
+    /**
+     * Clicks the Screen Mode item in the profile screen.
+     */
+    public void clickScreenMode() {
+        By locator = By.xpath(
+        "//*[contains(@content-desc,'screen_mode') or contains(@content-desc,'Screen Mode')]"
+    );
+
+        WebElement screenMode = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        screenMode.click();
+    }
+
+    /**
+     * Selects Dark theme from the screen mode dialog.
+     */
+    public void selectDarkTheme() {
+        By locator = By.xpath(
+        "//*[contains(@content-desc,'theme_dark') or contains(@content-desc,'Dark')]"
+    );
+
+        WebElement dark = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        dark.click();
+    }
+
+    /**
+     * Selects Device theme from the screen mode dialog.
+     */
+    public void selectDeviceTheme() {
+        By locator = By.xpath(
+        "//*[contains(@content-desc,'theme_device') or contains(@content-desc,'Device')]"
+    );
+        WebElement device = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        device.click();
+    }
+
+    /**
+     * Closes the screen mode dialog by pressing the back key.
+     */
+    public void closeScreenModeDialog() {
         if (!ios) {
             ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
         } else {

@@ -34,6 +34,7 @@ public final class AppiumDriverFactory {
         options.setAppPackage(ANDROID_APP_PACKAGE);
         options.setAppActivity(ANDROID_APP_ACTIVITY);
         options.setNoReset(false);
+
         return new AndroidDriver(new URL(APPIUM_SERVER_URL), options);
     }
 
