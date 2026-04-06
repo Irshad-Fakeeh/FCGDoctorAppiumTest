@@ -41,40 +41,10 @@ public class LoginTest {
         // Now on profile page
         ProfilePage profilePage = new ProfilePage(driver, wait, "ios".equals(platform));
 
-        // Click the profile image in the profile screen
-        profilePage.clickProfileImage();
+        // Perform the full profile test sequence
+        profilePage.performFullProfileTest();
 
-        System.out.println("Waiting for image dialog to open...");
-        Thread.sleep(3000); // Wait for dialog
-
-        // Close the profile image dialog
-        profilePage.closeProfileImageDialog();
-
-        System.out.println("Waiting after closing image dialog...");
-        Thread.sleep(2000);
-
-        // Click the QR code in the profile screen
-        profilePage.clickQRCode();
-
-        System.out.println("Waiting for QR dialog to open...");
-        Thread.sleep(3000); // Wait for dialog
-
-        // Close the QR dialog
-        profilePage.closeQRDialog();
-
-        System.out.println("Waiting after closing QR dialog...");
-        Thread.sleep(2000);
-
-        // Click the Privacy Policy in the profile screen
-        profilePage.clickPrivacyPolicy();
-
-        System.out.println("Clicked Privacy Policy. Pressing back to return to profile...");
-        Thread.sleep(3000); // Wait for privacy policy to open
-
-        // Press back to close privacy policy and return to profile
-        ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-
-        System.out.println("Pressed back. Session remains open for further inspection.");
+        System.out.println("Profile test sequence completed. Session remains open for further inspection.");
         // Keep the session open - remove driver.quit() to prevent closing
 
         
