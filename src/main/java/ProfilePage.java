@@ -22,6 +22,8 @@ public class ProfilePage {
         this.ios = ios;
     }
 
+
+
     /**
      * Clicks the profile image in the profile screen to open the image dialog.
      */
@@ -216,8 +218,10 @@ public class ProfilePage {
 
     /**
      * Performs the full profile test sequence: image, QR, privacy, language, screen mode.
+     * After completion, redirects to Notifications from the bottom navigation.
      */
     public void performFullProfileTest() throws InterruptedException {
+
         // Click the profile image in the profile screen
         clickProfileImage();
 
@@ -289,7 +293,7 @@ public class ProfilePage {
         // Close the screen mode dialog
         closeScreenModeDialog();
 
-        System.out.println("Closed screen mode dialog. Session remains open for further inspection.");
+        System.out.println("Profile test sequence completed. Session remains open for further inspection.");
         // Keep the session open - remove driver.quit() to prevent closing
 
     }

@@ -25,31 +25,28 @@ public class HomePage {
      * Flutter renders the GestureDetector wrapping the profile image at the top-left of the AppBar.
      */
     public void clickProfileAvatar() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("profile_avatar")
-                : By.xpath("//*[@content-desc='profile_avatar']");
+        By locator = By.xpath(
+    "(//*[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]"
+);
 
-        WebElement avatar = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        avatar.click();
+    WebElement avatar = wait.until(
+        ExpectedConditions.elementToBeClickable(locator)
+    );
+    avatar.click();
     }
 
-    /**
+    //view all appointments
+    public void clickViewAll() {
 
-     * for the notification list or empty state.
-     */
-    public boolean isNotificationsScreenVisible() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Notifications")
-                : By.xpath(
-                    "//*[@resource-id='android:id/content']" +
-                    "//*[@content-desc='Notifications']"
-                  );
+    By locator = By.xpath("//*[@content-desc='View All']");
 
-        try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    WebElement viewAll = wait.until(
+        ExpectedConditions.elementToBeClickable(locator)
+    );
+
+        viewAll.click();
+
+        System.out.println("Clicked View All successfully");
     }
-}
+   }
+

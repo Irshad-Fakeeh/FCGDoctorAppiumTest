@@ -1,5 +1,7 @@
+NotificationsPage.class
+AppiumDriverFactory.class
+SchedulePage.class
 LoginPage.class
 HomePage.class
 LoginTest.class
 ProfilePage.class
-AppiumDriverFactory.class
