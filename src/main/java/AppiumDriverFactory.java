@@ -29,7 +29,7 @@ public final class AppiumDriverFactory {
 
         UiAutomator2Options options = new UiAutomator2Options();
         options.setPlatformName("Android");
-        options.setDeviceName("emulator-5554");
+        options.setDeviceName("emulator-5556");
         options.setAutomationName("UiAutomator2");
         options.setAppPackage(ANDROID_APP_PACKAGE);
         options.setAppActivity(ANDROID_APP_ACTIVITY);

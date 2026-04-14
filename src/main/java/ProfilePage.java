@@ -30,7 +30,7 @@ public class ProfilePage {
     public void clickProfileImage() {
         By locator = ios
                 ? AppiumBy.accessibilityId("profile_image")
-                : By.xpath("//*[@content-desc='profile_image']");
+                : By.xpath("(//android.widget.ScrollView//android.widget.ImageView)[1]");
 
         WebElement image = wait.until(ExpectedConditions.elementToBeClickable(locator));
         image.click();
@@ -55,7 +55,7 @@ public class ProfilePage {
     public void clickQRCode() {
         By locator = ios
                 ? AppiumBy.accessibilityId("qr_code")
-                : By.xpath("//*[@content-desc='qr_code']");
+                : By.xpath("(//android.widget.ScrollView//android.widget.ImageView)[2]");
 
         WebElement qrCode = wait.until(ExpectedConditions.elementToBeClickable(locator));
         qrCode.click();
@@ -76,9 +76,9 @@ public class ProfilePage {
      * Clicks the Change Language item in the profile screen to toggle between English and Arabic.
      */
     public void clickChangeLanguage() {
-         By locator = By.xpath(
-        "//*[contains(@content-desc,'change_language') or contains(@content-desc,'Change Language')]"
-    );
+        By locator = ios
+                ? AppiumBy.accessibilityId("change_language")
+                : By.xpath("//*[contains(@content-desc,'change_language') or contains(@content-desc,'Change Language')]");
         WebElement changeLanguage = wait.until(ExpectedConditions.elementToBeClickable(locator));
         changeLanguage.click();
     }
@@ -132,9 +132,9 @@ public class ProfilePage {
      * Clicks the Screen Mode item in the profile screen.
      */
     public void clickScreenMode() {
-        By locator = By.xpath(
-        "//*[contains(@content-desc,'screen_mode') or contains(@content-desc,'Screen Mode')]"
-    );
+        By locator = ios
+                ? AppiumBy.accessibilityId("screen_mode")
+                : By.xpath("//*[contains(@content-desc,'screen_mode') or contains(@content-desc,'Screen Mode')]");
 
         WebElement screenMode = wait.until(ExpectedConditions.elementToBeClickable(locator));
         screenMode.click();
@@ -144,9 +144,9 @@ public class ProfilePage {
      * Selects Dark theme from the screen mode dialog.
      */
     public void selectDarkTheme() {
-        By locator = By.xpath(
-        "//*[contains(@content-desc,'theme_dark') or contains(@content-desc,'Dark')]"
-    );
+        By locator = ios
+                ? AppiumBy.accessibilityId("theme_dark")
+                : By.xpath("//*[contains(@content-desc,'theme_dark') or contains(@content-desc,'Dark')]");
 
         WebElement dark = wait.until(ExpectedConditions.elementToBeClickable(locator));
         dark.click();
@@ -156,9 +156,9 @@ public class ProfilePage {
      * Selects Device theme from the screen mode dialog.
      */
     public void selectDeviceTheme() {
-        By locator = By.xpath(
-        "//*[contains(@content-desc,'theme_device') or contains(@content-desc,'Device')]"
-    );
+        By locator = ios
+                ? AppiumBy.accessibilityId("theme_device")
+                : By.xpath("//*[contains(@content-desc,'theme_device') or contains(@content-desc,'Device')]");
         WebElement device = wait.until(ExpectedConditions.elementToBeClickable(locator));
         device.click();
     }
@@ -177,18 +177,17 @@ public class ProfilePage {
     /**
      * Clicks the Privacy Policy item in the profile screen.
      */
-   public void clickPrivacyPolicy() {
+    public void clickPrivacyPolicy() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("privacy_policy")
+                : By.xpath("//*[contains(@content-desc,'privacy_policy') or contains(@content-desc,'Privacy')]");
 
-    By locator = By.xpath(
-        "//*[contains(@content-desc,'privacy_policy') or contains(@content-desc,'Privacy')]"
-    );
+        WebElement privacyPolicy = wait.until(
+                ExpectedConditions.elementToBeClickable(locator)
+        );
 
-    WebElement privacyPolicy = wait.until(
-            ExpectedConditions.elementToBeClickable(locator)
-    );
-
-    privacyPolicy.click();
-}
+        privacyPolicy.click();
+    }
 
  public void closePrivacyPolicy() {
         if (!ios) {
@@ -253,7 +252,11 @@ public class ProfilePage {
         Thread.sleep(3000); // Wait for privacy policy to open
 
         // Press back to close privacy policy and return to profile
-        ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+        if (!ios) {
+            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+        } else {
+            driver.navigate().back();
+        }
 
         System.out.println("Waiting after back from privacy policy...");
         Thread.sleep(2000);

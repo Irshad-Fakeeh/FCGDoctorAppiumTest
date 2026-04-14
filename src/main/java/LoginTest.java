@@ -40,33 +40,38 @@ public class LoginTest {
         // Perform the full profile test sequence
         ProfilePage profilePage = new ProfilePage(driver, wait, "ios".equals(platform));
         profilePage.performFullProfileTest();
-
-        System.out.println("Profile test sequence completed. Navigating to Notifications...");
         Thread.sleep(2000);
 
         // Now navigate to notifications page - test notifications
         NotificationsPage notificationsPage = new NotificationsPage(driver, wait, "ios".equals(platform));
         notificationsPage.testNotifications();
-
-        System.out.println("Notifications test sequence completed. Navigating to Notifications...");
-
         
         System.out.println("Navigating to View All appointments...");
-        homePage.clickViewAll();
+        Thread.sleep(2000);
+        homePage.clickScheduleFromBottomNav();
         Thread.sleep(3000);
 
         SchedulePage schedulePage = new SchedulePage(driver, wait, "ios".equals(platform));
-        System.out.println("Switching from Physical to Virtual tab...");
-        schedulePage.switchFromPhysicalToVirtual();
+        schedulePage.testSchedulePage();
+
+        System.out.println("Navigating back to Home page...");
+        homePage.clickHomeFromBottomNav();
+        Thread.sleep(3000);
+
+        System.out.println("Toggling appointment status chart to monthly...");
+        homePage.toggleAppointmentChartView();
         Thread.sleep(2000);
 
-        System.out.println("Switching from Virtual to Physical tab...");
-        schedulePage.switchFromVirtualToPhysical();
+        System.out.println("Toggling appointment status chart back to weekly...");
+        homePage.toggleAppointmentChartView();
         Thread.sleep(2000);
+
+        System.out.println("Navigating to Current Inpatient section...");
+        homePage.clickCurrentInpatient();
+        Thread.sleep(3000);
 
         System.out.println("All test sequences are completed. Session remains open for further inspection.");
         Thread.sleep(5000);
-
 
     }
 }

@@ -25,14 +25,14 @@ public class HomePage {
      * Flutter renders the GestureDetector wrapping the profile image at the top-left of the AppBar.
      */
     public void clickProfileAvatar() {
-        By locator = By.xpath(
-    "(//*[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]"
-);
+        By locator = ios
+                ? AppiumBy.accessibilityId("profile_image")
+                : By.xpath("(//android.view.View[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]");
 
-    WebElement avatar = wait.until(
-        ExpectedConditions.elementToBeClickable(locator)
-    );
-    avatar.click();
+        WebElement avatar = wait.until(
+                ExpectedConditions.elementToBeClickable(locator)
+        );
+        avatar.click();
     }
 
     //view all appointments
@@ -48,5 +48,51 @@ public class HomePage {
 
         System.out.println("Clicked View All successfully");
     }
-   }
+
+     public void clickScheduleFromBottomNav() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("Schedule")
+                : By.xpath("//*[contains(@content-desc,'Schedule')]");
+
+        WebElement schedule = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        schedule.click();
+    }
+
+    public void clickHomeFromBottomNav() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("Home")
+                : By.xpath("//*[contains(@content-desc,'Home')]");
+
+        WebElement home = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        home.click();
+    }
+
+    /**
+     * Toggles the appointment status chart between weekly and monthly views.
+     */
+    public void toggleAppointmentChartView() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("Weekly")  // Assuming accessibility ID for iOS
+                : By.xpath("//*[contains(@content-desc,'Weekly') or contains(@content-desc,'Monthly')]");
+
+        WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        toggle.click();
+        System.out.println("Toggled appointment status chart view.");
+    }
+
+    /**
+     * Redirects to the current inpatient section from the dashboard.
+     */
+    public void clickCurrentInpatient() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("Current Inpatient")
+                : By.xpath("//*[contains(@content-desc,'Current Inpatient') or contains(@text,'Current Inpatient') or contains(@content-desc,'Inpatient')]");
+
+        WebElement inpatient = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        inpatient.click();
+        System.out.println("Navigated to Current Inpatient section.");
+    }
+
+    
+}
 

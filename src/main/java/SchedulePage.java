@@ -1,9 +1,13 @@
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.util.List;
 
 public class SchedulePage {
 
@@ -17,6 +21,24 @@ public class SchedulePage {
         this.ios = ios;
     }
 
+    public void testSchedulePage() throws InterruptedException {
+
+        System.out.println("Switching from Physical to Virtual tab...");
+        switchFromPhysicalToVirtual();
+        Thread.sleep(2000);
+
+        System.out.println("Switching from Virtual to Physical tab...");
+        switchFromVirtualToPhysical();
+        Thread.sleep(2000);
+
+        System.out.println("Waiting for first appointment selection...");
+        clickFirstAppointment();
+        Thread.sleep(3000);
+
+        System.out.println("Going back from appointment details...");
+        goBackFromAppointmentDetails();
+        Thread.sleep(2000);
+    }
     /**
      * Clicks the Physical appointments tab.
      */
@@ -87,5 +109,66 @@ public class SchedulePage {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void clickFirstAppointment() {
+
+    By itemsLocator = By.xpath(
+        "//android.widget.ScrollView//android.view.View[@content-desc]"
+    );
+
+    try {
+        // Get all items
+        List<WebElement> items = driver.findElements(itemsLocator);
+
+        if (items.isEmpty()) {
+            System.out.println("[INFO] No appointments available.");
+            System.out.println("Returning to Home page...");
+            goBackToHomePage();
+            return; // safely exit
+        }
+
+        // Click first item
+        WebElement firstItem = wait.until(
+            ExpectedConditions.elementToBeClickable(items.get(0))
+        );
+
+        firstItem.click();
+        System.out.println("[SUCCESS] Clicked first appointment");
+
+    } catch (Exception e) {
+        System.out.println("[ERROR] Failed to click appointment: " + e.getMessage());
+    }
+    }
+
+     public void goBackToHomePage() {
+
+        By locator;
+
+        if (ios) {
+            locator = AppiumBy.accessibilityId("Home");
+        } else {
+            locator = By.xpath("//android.view.View[contains(@content-desc,'Home')]");
+        }
+
+        WebElement homeTab = wait.until(
+                ExpectedConditions.elementToBeClickable(locator)
+        );
+
+        homeTab.click();
+
+        System.out.println("Navigated to Home via bottom nav");
+    }
+
+    /**
+     * Goes back from appointment details screen by pressing the back key.
+     */
+    public void goBackFromAppointmentDetails() {
+        if (!ios) {
+            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+        } else {
+            driver.navigate().back();
+        }
+        System.out.println("Returned from appointment details");
     }
 }
