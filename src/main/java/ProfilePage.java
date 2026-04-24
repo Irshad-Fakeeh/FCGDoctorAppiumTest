@@ -104,12 +104,7 @@ public class ProfilePage {
             WebElement arabic = wait.until(ExpectedConditions.elementToBeClickable(locator));
             arabic.click();
         } catch (Exception e) {
-            System.out.println("Failed to find Arabic element. Saving page source to page_source.xml");
-            try (FileWriter fw = new FileWriter("page_source.xml")) {
-                fw.write(driver.getPageSource());
-            } catch (IOException io) {
-                System.out.println("Failed to save page source: " + io.getMessage());
-            }
+            System.out.println("Failed to find Arabic element. Printing getPageSource() is disabled to prevent uiAutomator crashes.");
             throw e;
         }
     }

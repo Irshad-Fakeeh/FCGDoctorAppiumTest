@@ -25,25 +25,58 @@ public class HomePage {
      * Flutter renders the GestureDetector wrapping the profile image at the top-left of the AppBar.
      */
     public void clickProfileAvatar() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("profile_avatar")
-                : By.xpath("//*[@content-desc='profile_avatar']");
+        By locator = AppiumBy.accessibilityId("profile_avatar");
 
-        WebElement avatar = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        avatar.click();
+        try {
+            WebElement avatar = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            avatar.click();
+        } catch (Exception e) {
+            System.err.println("\n============== APP UI DUMP ON HOME PAGE FAIL ==============");
+            System.err.println("Driver could not find the 'profile_avatar' element! Printing layout to see what screen we are actually on:");
+            System.err.println("Printing getPageSource() is disabled to prevent uiAutomator crashes.");
+            System.err.println("=============================================================\n");
+            throw e;
+        }
     }
 
     /**
+     * Taps the Discharge tab.
+     */
+    public void clickDischargeTab() {
+        System.out.println("Navigating to Home and waiting for UI to stabilize (5s)...");
+        try { Thread.sleep(5000); } catch (InterruptedException ignored) {} // EXTENDED BUFFER FOR STABILITY
+        
+        // Primary: Find by description. 
+        // Fallback: Click the 3rd icon on the bottom nav if description fails.
+        By descriptionLocator = ios ? AppiumBy.accessibilityId("Discharge") 
+                                     : AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"Discharge\")");
+        
+        By instanceLocator = AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.ImageView\").instance(3)");
+        
+        try {
+            WebElement tab;
+            try {
+                tab = wait.until(ExpectedConditions.elementToBeClickable(descriptionLocator));
+            } catch (Exception e) {
+                System.out.println("Description-based search failed or timed out. Trying instance-based fallback...");
+                tab = wait.until(ExpectedConditions.elementToBeClickable(instanceLocator));
+            }
+            tab.click();
+            System.out.println("Discharge tab clicked successfully!");
+        } catch (Exception e) {
+            System.err.println("\n============== APP UI DUMP ON DISCHARGE TAB CLICK FAIL ==============");
+            System.err.println("Driver could not find the Discharge tab! (Both description and instance failed)");
+            System.err.println("Printing getPageSource() is disabled to prevent uiAutomator crashes.");
+            System.err.println("======================================================================\n");
+            throw e;
+        }
+    }
 
-     * for the notification list or empty state.
+    /**
+     * Checks if the notifications screen is visible.
      */
     public boolean isNotificationsScreenVisible() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Notifications")
-                : By.xpath(
-                    "//*[@resource-id='android:id/content']" +
-                    "//*[@content-desc='Notifications']"
-                  );
+        By locator = AppiumBy.accessibilityId("Notifications");
 
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(locator));

@@ -5,6 +5,7 @@ import io.appium.java_client.ios.IOSDriver;
 import io.appium.java_client.ios.options.XCUITestOptions;
 
 import java.net.URL;
+import java.time.Duration;
 
 public final class AppiumDriverFactory {
 
@@ -34,6 +35,10 @@ public final class AppiumDriverFactory {
         options.setAppPackage(ANDROID_APP_PACKAGE);
         options.setAppActivity(ANDROID_APP_ACTIVITY);
         options.setNoReset(false);
+        options.setAppWaitActivity("*");
+        options.setAutoGrantPermissions(true);
+        options.setDisableWindowAnimation(true);
+        options.setUiautomator2ServerLaunchTimeout(Duration.ofSeconds(90));
 
         return new AndroidDriver(new URL(APPIUM_SERVER_URL), options);
     }
