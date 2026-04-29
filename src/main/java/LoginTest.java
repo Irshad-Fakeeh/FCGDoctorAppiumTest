@@ -47,9 +47,9 @@ public class LoginTest {
         homePage.toggleAppointmentChartView();
         Thread.sleep(2000);
 
-        // System.out.println("Toggling appointment status chart back to weekly...");
-        // homePage.toggleAppointmentChartView();
-        // Thread.sleep(2000);
+        System.out.println("Toggling appointment status chart back to weekly...");
+        homePage.toggleAppointmentChartView();
+        Thread.sleep(2000);
 
         System.out.println("Navigating to Current Inpatient section...");
         homePage.clickCurrentInpatient();

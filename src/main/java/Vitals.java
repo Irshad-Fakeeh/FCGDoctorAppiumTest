@@ -35,7 +35,7 @@ public class Vitals {
             Thread.sleep(1500);
 
             // Click History and go back
-            clickHistory();
+            // clickHistory();
             Thread.sleep(1500);
 
             // Go back from Vitals
