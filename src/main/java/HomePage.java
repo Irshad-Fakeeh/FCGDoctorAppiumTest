@@ -81,140 +81,20 @@ public class HomePage {
         System.out.println("Toggled appointment status chart view.");
     }
 
-    /**
-     * Redirects to the current inpatient section from the dashboard.
-     */
     public void clickCurrentInpatient() {
-        if (ios) {
-            tapElement(AppiumBy.accessibilityId("Current Inpatient"), "Current Inpatient");
-            return;
-        }
-        scrollToTop();
-        dumpPageSourceKeywords("inpatient", "patient");
-        tapDashboardCard("inpatient", "Current Inpatient");
+        By locator = ios
+                ? AppiumBy.accessibilityId("Current Inpatient")
+                : By.xpath("//*[contains(@content-desc,'Current Inpatient') or contains(@content-desc,'Inpatient')]");
+
+        tapElement(locator, "Current Inpatient");
     }
 
-    /**
-     * Redirects to the critical outpatient section from the dashboard.
-     */
     public void clickCriticalOutpatient() {
-        if (ios) {
-            tapElement(AppiumBy.accessibilityId("Critical Outpatient"), "Critical Outpatient");
-            return;
-        }
-        dumpPageSourceKeywords("outpatient", "critical");
-        tapDashboardCard("outpatient", "Critical Outpatient");
-    }
+        By locator = ios
+                ? AppiumBy.accessibilityId("Critical Outpatient")
+                : By.xpath("//*[contains(@content-desc,'Critical Outpatient') or contains(@content-desc,'Critical Out')]");
 
-    /**
-     * Finds a dashboard card whose content-desc contains the given keyword
-     * (case-insensitive) and taps it via coordinate gesture.
-     */
-    private void tapDashboardCard(String keyword, String label) {
-        try {
-            // Wait up to 15s for at least one matching element to appear
-            By broad = By.xpath("//android.view.View[@content-desc]");
-            wait.withTimeout(java.time.Duration.ofSeconds(15))
-                .until(ExpectedConditions.presenceOfElementLocated(broad));
-
-            java.util.List<WebElement> allViews = driver.findElements(broad);
-            System.out.println("[DIAG] Total android.view.View[@content-desc] elements: " + allViews.size());
-
-            WebElement target = null;
-            for (WebElement v : allViews) {
-                String desc = v.getAttribute("content-desc");
-                if (desc != null && desc.toLowerCase().contains(keyword.toLowerCase())) {
-                    System.out.println("[DIAG] Match → content-desc: " + desc);
-                    target = v;
-                    break;
-                }
-            }
-
-            if (target == null) {
-                // scroll down once and retry
-                scrollDown();
-                Thread.sleep(1500);
-                allViews = driver.findElements(broad);
-                for (WebElement v : allViews) {
-                    String desc = v.getAttribute("content-desc");
-                    if (desc != null && desc.toLowerCase().contains(keyword.toLowerCase())) {
-                        System.out.println("[DIAG] Match after scroll → content-desc: " + desc);
-                        target = v;
-                        break;
-                    }
-                }
-            }
-
-            if (target == null) {
-                throw new RuntimeException("No element found with keyword '" + keyword + "' in content-desc");
-            }
-
-            int x = target.getLocation().getX() + target.getSize().getWidth() / 2;
-            int y = target.getLocation().getY() + target.getSize().getHeight() / 2;
-            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-            System.out.println("[SUCCESS] Tapped dashboard card: " + label);
-
-        } catch (Exception e) {
-            System.out.println("[ERROR] tapDashboardCard failed for '" + label + "': " + e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void dumpPageSourceKeywords(String... keywords) {
-        try {
-            String src = driver.getPageSource();
-            System.out.println("[DIAG] ===== PAGE SOURCE (keyword filter) =====");
-            for (String line : src.split("\n")) {
-                String lower = line.toLowerCase();
-                for (String kw : keywords) {
-                    if (lower.contains(kw.toLowerCase())) {
-                        System.out.println("[DIAG] " + line.trim());
-                        break;
-                    }
-                }
-            }
-            System.out.println("[DIAG] ==========================================");
-        } catch (Exception e) {
-            System.out.println("[DIAG] Could not dump page source: " + e.getMessage());
-        }
-    }
-
-    private void scrollToTop() {
-        if (ios) return;
-        try {
-            int width = driver.manage().window().getSize().getWidth();
-            int height = driver.manage().window().getSize().getHeight();
-            driver.executeScript("mobile: swipeGesture", java.util.Map.of(
-                    "left", width / 4,
-                    "top", (int) (height * 0.2),
-                    "width", width / 2,
-                    "height", (int) (height * 0.6),
-                    "direction", "down",
-                    "percent", 0.9,
-                    "speed", 600));
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            System.out.println("[WARNING] scrollToTop failed: " + e.getMessage());
-        }
-    }
-
-    private void scrollDown() {
-        if (ios) return;
-        try {
-            int width = driver.manage().window().getSize().getWidth();
-            int height = driver.manage().window().getSize().getHeight();
-            driver.executeScript("mobile: swipeGesture", java.util.Map.of(
-                    "left", width / 4,
-                    "top", (int) (height * 0.2),
-                    "width", width / 2,
-                    "height", (int) (height * 0.6),
-                    "direction", "up",
-                    "percent", 0.6,
-                    "speed", 600));
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            System.out.println("[WARNING] scrollDown failed: " + e.getMessage());
-        }
+        tapElement(locator, "Critical Outpatient");
     }
 
     private void tapElement(By locator, String name) {
