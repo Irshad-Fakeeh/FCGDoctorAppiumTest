@@ -1,8 +1,5 @@
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
-import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.android.nativekey.AndroidKey;
-import io.appium.java_client.android.nativekey.KeyEvent;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -20,36 +17,27 @@ public class HomePage {
         this.ios = ios;
     }
 
-    /**
-     * Taps the doctor profile avatar in the AppBar to navigate to Profile &
-     * Settings screen.
-     * Flutter renders the GestureDetector wrapping the profile image at the
-     * top-left of the AppBar.
-     */
+    // 🔹 Profile Avatar
     public void clickProfileAvatar() {
         By locator = ios
                 ? AppiumBy.accessibilityId("profile_image")
-                : By.xpath(
-                        "(//android.view.View[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]");
+                : By.xpath("(//android.view.View[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]");
 
-        WebElement avatar = wait.until(
-                ExpectedConditions.elementToBeClickable(locator));
+        WebElement avatar = wait.until(ExpectedConditions.elementToBeClickable(locator));
         avatar.click();
     }
 
-    // view all appointments
+    // 🔹 View All
     public void clickViewAll() {
-
         By locator = By.xpath("//*[@content-desc='View All']");
 
-        WebElement viewAll = wait.until(
-                ExpectedConditions.elementToBeClickable(locator));
-
+        WebElement viewAll = wait.until(ExpectedConditions.elementToBeClickable(locator));
         viewAll.click();
 
         System.out.println("Clicked View All successfully");
     }
 
+    // 🔹 Bottom Nav - Schedule
     public void clickScheduleFromBottomNav() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Schedule")
@@ -59,6 +47,7 @@ public class HomePage {
         schedule.click();
     }
 
+    // 🔹 Bottom Nav - Home
     public void clickHomeFromBottomNav() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Home")
@@ -68,45 +57,37 @@ public class HomePage {
         home.click();
     }
 
-    /**
-     * Toggles the appointment status chart between weekly and monthly views.
-     */
+    // 🔹 Toggle Weekly / Monthly
     public void toggleAppointmentChartView() {
         By locator = ios
-                ? AppiumBy.accessibilityId("Weekly") // Assuming accessibility ID for iOS
+                ? AppiumBy.accessibilityId("Weekly")
                 : By.xpath("//*[contains(@content-desc,'Weekly') or contains(@content-desc,'Monthly')]");
 
         WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(locator));
         toggle.click();
+
         System.out.println("Toggled appointment status chart view.");
     }
 
+    // 🔹 Current Inpatients
     public void clickCurrentInpatient() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Current Inpatients")
-                : By.xpath("//*[contains(@content-desc,'Current Inpatients')]");
+                : By.xpath("//android.widget.ImageView[@content-desc='Current Inpatients']");
 
-        tapElement(locator, "Current Inpatient");
+        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        el.click();
+        System.out.println("[SUCCESS] Clicked Current Inpatients");
     }
 
+    // 🔹 Critical Outpatients
     public void clickCriticalOutpatient() {
         By locator = ios
-                ? AppiumBy.accessibilityId("Critical Outpatient")
-                : By.xpath("//*[contains(@content-desc,'Critical Outpatient') or contains(@content-desc,'Critical Out')]");
+                ? AppiumBy.accessibilityId("Critical Outpatients")
+                : By.xpath("//android.widget.ImageView[@content-desc='Critical Outpatients']");
 
-        tapElement(locator, "Critical Outpatient");
-    }
-
-    private void tapElement(By locator, String name) {
-        try {
-            WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-            int x = el.getLocation().getX() + el.getSize().getWidth() / 2;
-            int y = el.getLocation().getY() + el.getSize().getHeight() / 2;
-            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-            System.out.println("[SUCCESS] Tapped: " + name);
-        } catch (Exception e) {
-            System.out.println("[ERROR] Could not tap " + name + ": " + e.getMessage());
-            throw new RuntimeException(e);
-        }
+        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        el.click();
+        System.out.println("[SUCCESS] Clicked Critical Outpatients");
     }
 }
