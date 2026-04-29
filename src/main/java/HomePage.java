@@ -72,12 +72,18 @@ public class HomePage {
     // 🔹 Current Inpatients
     public void clickCurrentInpatient() throws InterruptedException {
         scrollToTop();
-        Thread.sleep(1000);
+        Thread.sleep(1500);
+
         By locator = ios
                 ? AppiumBy.accessibilityId("Current Inpatients")
-                : AppiumBy.accessibilityId("Current Inpatients");
-        WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-        el.click();
+                : By.xpath("//android.widget.ImageView[@content-desc='Current Inpatients']");
+
+        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        System.out.println("[DEBUG] Found element: " + el.getAttribute("content-desc"));
+
+        int x = el.getLocation().getX() + el.getSize().getWidth() / 2;
+        int y = el.getLocation().getY() + el.getSize().getHeight() / 2;
+        driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
         System.out.println("[SUCCESS] Clicked Current Inpatients");
     }
 
