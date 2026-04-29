@@ -71,22 +71,32 @@ public class HomePage {
 
     // 🔹 Current Inpatients
     public void clickCurrentInpatient() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Current Inpatients")
-                : By.xpath("//android.widget.ImageView[@content-desc='Current Inpatients']");
-
-        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        if (ios) {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    AppiumBy.accessibilityId("Current Inpatients"))).click();
+            System.out.println("[SUCCESS] Clicked Current Inpatients");
+            return;
+        }
+        By locator = AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
+                ".scrollIntoView(new UiSelector().description(\"Current Inpatients\"))");
+        WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
         el.click();
         System.out.println("[SUCCESS] Clicked Current Inpatients");
     }
 
     // 🔹 Critical Outpatients
     public void clickCriticalOutpatient() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Critical Outpatients")
-                : By.xpath("//android.widget.ImageView[@content-desc='Critical Outpatients']");
-
-        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        if (ios) {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    AppiumBy.accessibilityId("Critical Outpatients"))).click();
+            System.out.println("[SUCCESS] Clicked Critical Outpatients");
+            return;
+        }
+        By locator = AppiumBy.androidUIAutomator(
+                "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
+                ".scrollIntoView(new UiSelector().description(\"Critical Outpatients\"))");
+        WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
         el.click();
         System.out.println("[SUCCESS] Clicked Critical Outpatients");
     }
