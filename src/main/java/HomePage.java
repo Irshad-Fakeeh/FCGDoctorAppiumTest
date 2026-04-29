@@ -71,49 +71,54 @@ public class HomePage {
 
     // 🔹 Current Inpatients
     public void clickCurrentInpatient() throws InterruptedException {
-        scrollToTop();
-        Thread.sleep(1500);
-
-        By locator = ios
-                ? AppiumBy.accessibilityId("Current Inpatients")
-                : By.xpath("//android.widget.ImageView[@content-desc='Current Inpatients']");
-
-        WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-        System.out.println("[DEBUG] Found element: " + el.getAttribute("content-desc"));
-
-        int x = el.getLocation().getX() + el.getSize().getWidth() / 2;
-        int y = el.getLocation().getY() + el.getSize().getHeight() / 2;
-        driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-        System.out.println("[SUCCESS] Clicked Current Inpatients");
+        tapDashboardCard("Current Inpatients");
     }
 
     // 🔹 Critical Outpatients
     public void clickCriticalOutpatient() throws InterruptedException {
-        scrollToTop();
-        Thread.sleep(1000);
-        By locator = ios
-                ? AppiumBy.accessibilityId("Critical Outpatients")
-                : AppiumBy.accessibilityId("Critical Outpatients");
-        WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
-        el.click();
-        System.out.println("[SUCCESS] Clicked Critical Outpatients");
+        tapDashboardCard("Critical Outpatients");
     }
 
-    private void scrollToTop() {
-        if (ios) return;
-        try {
-            int width  = driver.manage().window().getSize().getWidth();
-            int height = driver.manage().window().getSize().getHeight();
+    /**
+     * Flutter accessibility nodes fail visibilityOfElementLocated (isDisplayed=false).
+     * Strategy: presenceOfElementLocated finds the element, then we validate its Y
+     * coordinate against the screen. If off-screen, swipe down and re-fetch until
+     * the centre is within the viewport, then fire a coordinate gesture tap.
+     */
+    private void tapDashboardCard(String contentDesc) throws InterruptedException {
+        By locator = ios
+                ? AppiumBy.accessibilityId(contentDesc)
+                : By.xpath("//android.widget.ImageView[@content-desc='" + contentDesc + "']");
+
+        // presenceOfElementLocated is the only condition that reliably returns
+        // Flutter semantic nodes regardless of scroll position.
+        WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+
+        int screenW = driver.manage().window().getSize().getWidth();
+        int screenH = driver.manage().window().getSize().getHeight();
+
+        // Swipe down up to 4 times until the element's centre is on-screen.
+        for (int i = 0; i < 4; i++) {
+            int cy = el.getLocation().getY() + el.getSize().getHeight() / 2;
+            System.out.println("[DEBUG] '" + contentDesc + "' centre Y=" + cy + " screenH=" + screenH);
+            if (cy > 0 && cy < screenH) break;
+
             driver.executeScript("mobile: swipeGesture", java.util.Map.of(
-                    "left",      width / 4,
-                    "top",       (int)(height * 0.2),
-                    "width",     width / 2,
-                    "height",    (int)(height * 0.6),
+                    "left", screenW / 4,
+                    "top",  (int)(screenH * 0.15),
+                    "width", screenW / 2,
+                    "height", (int)(screenH * 0.70),
                     "direction", "down",
-                    "percent",   0.95,
-                    "speed",     800));
-        } catch (Exception e) {
-            System.out.println("[WARNING] scrollToTop failed: " + e.getMessage());
+                    "percent", 0.85,
+                    "speed", 600));
+            Thread.sleep(900);
+            el = driver.findElement(locator);
         }
+
+        int x = el.getLocation().getX() + el.getSize().getWidth() / 2;
+        int y = el.getLocation().getY() + el.getSize().getHeight() / 2;
+        System.out.println("[DEBUG] Tapping '" + contentDesc + "' at (" + x + ", " + y + ")");
+        driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+        System.out.println("[SUCCESS] Tapped: " + contentDesc);
     }
 }
