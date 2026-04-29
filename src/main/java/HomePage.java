@@ -70,34 +70,44 @@ public class HomePage {
     }
 
     // 🔹 Current Inpatients
-    public void clickCurrentInpatient() {
-        if (ios) {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(
-                    AppiumBy.accessibilityId("Current Inpatients"))).click();
-            System.out.println("[SUCCESS] Clicked Current Inpatients");
-            return;
-        }
-        By locator = AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
-                ".scrollIntoView(new UiSelector().description(\"Current Inpatients\"))");
+    public void clickCurrentInpatient() throws InterruptedException {
+        scrollToTop();
+        Thread.sleep(1000);
+        By locator = ios
+                ? AppiumBy.accessibilityId("Current Inpatients")
+                : AppiumBy.accessibilityId("Current Inpatients");
         WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
         el.click();
         System.out.println("[SUCCESS] Clicked Current Inpatients");
     }
 
     // 🔹 Critical Outpatients
-    public void clickCriticalOutpatient() {
-        if (ios) {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(
-                    AppiumBy.accessibilityId("Critical Outpatients"))).click();
-            System.out.println("[SUCCESS] Clicked Critical Outpatients");
-            return;
-        }
-        By locator = AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
-                ".scrollIntoView(new UiSelector().description(\"Critical Outpatients\"))");
+    public void clickCriticalOutpatient() throws InterruptedException {
+        scrollToTop();
+        Thread.sleep(1000);
+        By locator = ios
+                ? AppiumBy.accessibilityId("Critical Outpatients")
+                : AppiumBy.accessibilityId("Critical Outpatients");
         WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
         el.click();
         System.out.println("[SUCCESS] Clicked Critical Outpatients");
+    }
+
+    private void scrollToTop() {
+        if (ios) return;
+        try {
+            int width  = driver.manage().window().getSize().getWidth();
+            int height = driver.manage().window().getSize().getHeight();
+            driver.executeScript("mobile: swipeGesture", java.util.Map.of(
+                    "left",      width / 4,
+                    "top",       (int)(height * 0.2),
+                    "width",     width / 2,
+                    "height",    (int)(height * 0.6),
+                    "direction", "down",
+                    "percent",   0.95,
+                    "speed",     800));
+        } catch (Exception e) {
+            System.out.println("[WARNING] scrollToTop failed: " + e.getMessage());
+        }
     }
 }
