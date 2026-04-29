@@ -90,9 +90,8 @@ public class HomePage {
                 : By.xpath(
                         "//*[contains(@content-desc,'Current Inpatient') or contains(@text,'Current Inpatient') or contains(@content-desc,'Inpatient')]");
 
-        WebElement inpatient = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        inpatient.click();
-        System.out.println("Navigated to Current Inpatient section.");
+        scrollDownToReveal();
+        tapElement(locator, "Current Inpatient");
     }
 
     /**
@@ -104,8 +103,39 @@ public class HomePage {
                 : By.xpath(
                         "//*[starts-with(@content-desc,'Critical Outpatient') or contains(@text,'Critical Outpatient') or contains(@content-desc,'Critical Out')]");
 
-        WebElement outpatient = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        outpatient.click();
-        System.out.println("Navigated to Critical Outpatient section.");
+        scrollDownToReveal();
+        tapElement(locator, "Critical Outpatient");
+    }
+
+    private void scrollDownToReveal() {
+        if (ios) return;
+        try {
+            int width = driver.manage().window().getSize().getWidth();
+            int height = driver.manage().window().getSize().getHeight();
+            driver.executeScript("mobile: swipeGesture", java.util.Map.of(
+                    "left", width / 4,
+                    "top", (int) (height * 0.2),
+                    "width", width / 2,
+                    "height", (int) (height * 0.6),
+                    "direction", "up",
+                    "percent", 0.6,
+                    "speed", 600));
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            System.out.println("[WARNING] Scroll failed: " + e.getMessage());
+        }
+    }
+
+    private void tapElement(By locator, String name) {
+        try {
+            WebElement el = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+            int x = el.getLocation().getX() + el.getSize().getWidth() / 2;
+            int y = el.getLocation().getY() + el.getSize().getHeight() / 2;
+            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+            System.out.println("[SUCCESS] Tapped: " + name);
+        } catch (Exception e) {
+            System.out.println("[ERROR] Could not tap " + name + ": " + e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 }
