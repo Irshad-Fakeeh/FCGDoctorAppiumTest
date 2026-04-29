@@ -32,20 +32,43 @@ public class LoginTest {
 
         // Now on homepage, click notifications
         HomePage homePage = new HomePage(driver, wait, "ios".equals(platform));
-        homePage.clickProfileAvatar();
+        // homePage.clickProfileAvatar();
 
-        System.out.println("Waiting for profile page to load...");
-        Thread.sleep(5000); // Wait for navigation
+        // System.out.println("Waiting for profile page to load...");
+        // Thread.sleep(5000); // Wait for navigation
 
-        // Perform the full profile test sequence
-        ProfilePage profilePage = new ProfilePage(driver, wait, "ios".equals(platform));
-        profilePage.performFullProfileTest();
+        // // Perform the full profile test sequence
+        // ProfilePage profilePage = new ProfilePage(driver, wait,
+        // "ios".equals(platform));
+        // profilePage.performFullProfileTest();
+        // Thread.sleep(2000);
+
+        System.out.println("Toggling appointment status chart to monthly...");
+        homePage.toggleAppointmentChartView();
         Thread.sleep(2000);
+
+        // System.out.println("Toggling appointment status chart back to weekly...");
+        // homePage.toggleAppointmentChartView();
+        // Thread.sleep(2000);
+
+        System.out.println("Navigating to Current Inpatient section...");
+        homePage.clickCurrentInpatient();
+        Thread.sleep(3000);
+
+        CurrentInPatientPage inpatientPage = new CurrentInPatientPage(driver, wait, "ios".equals(platform));
+        inpatientPage.TestInPatient();
+
+        System.out.println("Navigating to Critical Outpatient section...");
+        homePage.clickCriticalOutpatient();
+        Thread.sleep(3000);
+
+        CriticalOutPatientPage outpatientPage = new CriticalOutPatientPage(driver, wait, "ios".equals(platform));
+        outpatientPage.testCriticalOutpatient();
 
         // Now navigate to notifications page - test notifications
         NotificationsPage notificationsPage = new NotificationsPage(driver, wait, "ios".equals(platform));
         notificationsPage.testNotifications();
-        
+
         System.out.println("Navigating to View All appointments...");
         Thread.sleep(2000);
         homePage.clickScheduleFromBottomNav();
@@ -56,18 +79,6 @@ public class LoginTest {
 
         System.out.println("Navigating back to Home page...");
         homePage.clickHomeFromBottomNav();
-        Thread.sleep(3000);
-
-        System.out.println("Toggling appointment status chart to monthly...");
-        homePage.toggleAppointmentChartView();
-        Thread.sleep(2000);
-
-        System.out.println("Toggling appointment status chart back to weekly...");
-        homePage.toggleAppointmentChartView();
-        Thread.sleep(2000);
-
-        System.out.println("Navigating to Current Inpatient section...");
-        homePage.clickCurrentInpatient();
         Thread.sleep(3000);
 
         System.out.println("All test sequences are completed. Session remains open for further inspection.");

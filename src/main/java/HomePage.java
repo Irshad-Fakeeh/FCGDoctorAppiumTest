@@ -20,36 +20,37 @@ public class HomePage {
         this.ios = ios;
     }
 
- /**
-     * Taps the doctor profile avatar in the AppBar to navigate to Profile & Settings screen.
-     * Flutter renders the GestureDetector wrapping the profile image at the top-left of the AppBar.
+    /**
+     * Taps the doctor profile avatar in the AppBar to navigate to Profile &
+     * Settings screen.
+     * Flutter renders the GestureDetector wrapping the profile image at the
+     * top-left of the AppBar.
      */
     public void clickProfileAvatar() {
         By locator = ios
                 ? AppiumBy.accessibilityId("profile_image")
-                : By.xpath("(//android.view.View[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]");
+                : By.xpath(
+                        "(//android.view.View[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]");
 
         WebElement avatar = wait.until(
-                ExpectedConditions.elementToBeClickable(locator)
-        );
+                ExpectedConditions.elementToBeClickable(locator));
         avatar.click();
     }
 
-    //view all appointments
+    // view all appointments
     public void clickViewAll() {
 
-    By locator = By.xpath("//*[@content-desc='View All']");
+        By locator = By.xpath("//*[@content-desc='View All']");
 
-    WebElement viewAll = wait.until(
-        ExpectedConditions.elementToBeClickable(locator)
-    );
+        WebElement viewAll = wait.until(
+                ExpectedConditions.elementToBeClickable(locator));
 
         viewAll.click();
 
         System.out.println("Clicked View All successfully");
     }
 
-     public void clickScheduleFromBottomNav() {
+    public void clickScheduleFromBottomNav() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Schedule")
                 : By.xpath("//*[contains(@content-desc,'Schedule')]");
@@ -72,7 +73,7 @@ public class HomePage {
      */
     public void toggleAppointmentChartView() {
         By locator = ios
-                ? AppiumBy.accessibilityId("Weekly")  // Assuming accessibility ID for iOS
+                ? AppiumBy.accessibilityId("Weekly") // Assuming accessibility ID for iOS
                 : By.xpath("//*[contains(@content-desc,'Weekly') or contains(@content-desc,'Monthly')]");
 
         WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(locator));
@@ -86,13 +87,25 @@ public class HomePage {
     public void clickCurrentInpatient() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Current Inpatient")
-                : By.xpath("//*[contains(@content-desc,'Current Inpatient') or contains(@text,'Current Inpatient') or contains(@content-desc,'Inpatient')]");
+                : By.xpath(
+                        "//*[contains(@content-desc,'Current Inpatient') or contains(@text,'Current Inpatient') or contains(@content-desc,'Inpatient')]");
 
         WebElement inpatient = wait.until(ExpectedConditions.elementToBeClickable(locator));
         inpatient.click();
         System.out.println("Navigated to Current Inpatient section.");
     }
 
-    
-}
+    /**
+     * Redirects to the critical outpatient section from the dashboard.
+     */
+    public void clickCriticalOutpatient() {
+        By locator = ios
+                ? AppiumBy.accessibilityId("Critical Outpatient")
+                : By.xpath(
+                        "//*[starts-with(@content-desc,'Critical Outpatient') or contains(@text,'Critical Outpatient') or contains(@content-desc,'Critical Out')]");
 
+        WebElement outpatient = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        outpatient.click();
+        System.out.println("Navigated to Critical Outpatient section.");
+    }
+}

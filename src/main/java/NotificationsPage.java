@@ -42,6 +42,8 @@ public class NotificationsPage {
         else {
                 System.out.println("No notifications available to click.");
         }
+
+        System.out.println("Notifications test sequence completed. Navigating to Notifications...");
     }
 
     /**

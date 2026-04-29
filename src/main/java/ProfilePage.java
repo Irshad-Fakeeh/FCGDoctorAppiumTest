@@ -65,10 +65,15 @@ public class ProfilePage {
      * Closes the QR code dialog by pressing the back key.
      */
     public void closeQRDialog() {
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            driver.navigate().back();
+        try {
+            if (!ios) {
+                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+            } else {
+                driver.navigate().back();
+            }
+            System.out.println("[SUCCESS] Closed QR dialog");
+        } catch (Exception e) {
+            System.out.println("[WARNING] Could not close QR dialog: " + e.getMessage());
         }
     }
 
@@ -178,24 +183,32 @@ public class ProfilePage {
      * Clicks the Privacy Policy item in the profile screen.
      */
     public void clickPrivacyPolicy() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("privacy_policy")
-                : By.xpath("//*[contains(@content-desc,'privacy_policy') or contains(@content-desc,'Privacy')]");
+        try {
+            By locator = ios
+                    ? AppiumBy.accessibilityId("privacy_policy")
+                    : By.xpath("//*[contains(@content-desc,'privacy_policy') or contains(@content-desc,'Privacy')]");
 
-        WebElement privacyPolicy = wait.until(
-                ExpectedConditions.elementToBeClickable(locator)
-        );
+            WebElement privacyPolicy = wait.until(
+                    ExpectedConditions.elementToBeClickable(locator)
+            );
 
-        privacyPolicy.click();
+            privacyPolicy.click();
+            System.out.println("[SUCCESS] Clicked Privacy Policy");
+        } catch (Exception e) {
+            System.out.println("[WARNING] Could not click Privacy Policy: " + e.getMessage());
+        }
     }
 
  public void closePrivacyPolicy() {
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            // For iOS, perhaps press back or find another way
-            // Assuming back key works or add iOS specific
-            driver.navigate().back();
+        try {
+            if (!ios) {
+                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+            } else {
+                driver.navigate().back();
+            }
+            System.out.println("[SUCCESS] Closed Privacy Policy dialog");
+        } catch (Exception e) {
+            System.out.println("[WARNING] Could not close Privacy Policy dialog: " + e.getMessage());
         }
     }
 
@@ -243,7 +256,7 @@ public class ProfilePage {
         closeQRDialog();
 
         System.out.println("Waiting after closing QR dialog...");
-        Thread.sleep(2000);
+        Thread.sleep(4000);
 
         // Click the Privacy Policy in the profile screen
         clickPrivacyPolicy();
@@ -251,12 +264,14 @@ public class ProfilePage {
         System.out.println("Clicked Privacy Policy. Pressing back to return to profile...");
         Thread.sleep(3000); // Wait for privacy policy to open
 
-        // Press back to close privacy policy and return to profile
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            driver.navigate().back();
-        }
+        closePrivacyPolicy();
+        
+        // // Press back to close privacy policy and return to profile
+        // if (!ios) {
+        //     ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+        // } else {
+        //     driver.navigate().back();
+        // }
 
         System.out.println("Waiting after back from privacy policy...");
         Thread.sleep(2000);

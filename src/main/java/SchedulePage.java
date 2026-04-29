@@ -113,8 +113,8 @@ public class SchedulePage {
 
     public void clickFirstAppointment() {
 
-    By itemsLocator = By.xpath(
-        "//android.widget.ScrollView//android.view.View[@content-desc]"
+        By itemsLocator = By.xpath(
+    "//*[contains(@content-desc,'Physical') or contains(@content-desc,'Virtual')]"
     );
 
     try {
@@ -124,7 +124,7 @@ public class SchedulePage {
         if (items.isEmpty()) {
             System.out.println("[INFO] No appointments available.");
             System.out.println("Returning to Home page...");
-            goBackToHomePage();
+            clickHomeFromBottomNav();
             return; // safely exit
         }
 
@@ -158,6 +158,15 @@ public class SchedulePage {
         homeTab.click();
 
         System.out.println("Navigated to Home via bottom nav");
+    }
+
+     public void clickHomeFromBottomNav() {
+       By locator = ios
+    ? AppiumBy.accessibilityId("Home")
+    : AppiumBy.accessibilityId("Home");
+
+        WebElement home = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        home.click();
     }
 
     /**
