@@ -83,8 +83,8 @@ public class HomePage {
 
     public void clickCurrentInpatient() {
         By locator = ios
-                ? AppiumBy.accessibilityId("Current Inpatient")
-                : By.xpath("//*[contains(@content-desc,'Current Inpatient') or contains(@content-desc,'Inpatient')]");
+                ? AppiumBy.accessibilityId("Current Inpatients")
+                : By.xpath("//*[contains(@content-desc,'Current Inpatients')]");
 
         tapElement(locator, "Current Inpatient");
     }
