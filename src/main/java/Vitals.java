@@ -54,16 +54,25 @@ public class Vitals {
 
     private void clickHistory() {
         try {
-            System.out.println("[INFO] Looking for Vitals History tab/button...");
+            System.out.println("[INFO] Looking for Vitals History ImageView container...");
+
+            // The vital card is a single ImageView whose content-desc contains the
+            // reading values followed by a newline and "History" at the end.
             By historyLocator = ios
                     ? AppiumBy.accessibilityId("History")
-                    : By.xpath("//*[contains(@content-desc,'History') or contains(@text,'History')]");
+                    : By.xpath("//android.widget.ImageView[contains(@content-desc,'History')]");
 
-            // Short wait so a missing button fails fast instead of blocking 30s
+            // presenceOfElementLocated works for Flutter semantic nodes;
+            // elementToBeClickable / visibilityOfElementLocated do not.
             WebDriverWait shortWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(5));
-            WebElement historyTab = shortWait.until(ExpectedConditions.elementToBeClickable(historyLocator));
-            historyTab.click();
-            System.out.println("[SUCCESS] Clicked History inside Vitals");
+            WebElement historyEl = shortWait.until(ExpectedConditions.presenceOfElementLocated(historyLocator));
+
+            System.out.println("[DEBUG] Found: " + historyEl.getAttribute("content-desc"));
+
+            int x = historyEl.getLocation().getX() + historyEl.getSize().getWidth() / 2;
+            int y = historyEl.getLocation().getY() + historyEl.getSize().getHeight() / 2;
+            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+            System.out.println("[SUCCESS] Clicked Vitals History container");
 
             Thread.sleep(2000);
 
@@ -76,8 +85,6 @@ public class Vitals {
             Thread.sleep(1000);
 
         } catch (Exception e) {
-            // History button not present for this patient — skip silently,
-            // goBackFromVitals() in navigateVitals() will still exit the section.
             System.out.println("[WARNING] Vitals History not found, skipping: " + e.getMessage());
         }
     }
