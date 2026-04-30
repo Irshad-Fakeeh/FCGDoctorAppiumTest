@@ -28,6 +28,7 @@ public class RadiologyReportsPage {
             Thread.sleep(1500);
 
             clickRadiologyHistory();
+            clickDetails();
 
             goBackFromRadiologyReports();
             System.out.println("[INFO] ===== RADIOLOGY REPORTS NAVIGATION COMPLETED =====");
@@ -66,6 +67,32 @@ public class RadiologyReportsPage {
 
         } catch (Exception e) {
             System.out.println("[WARNING] Could not interact with Radiology History: " + e.getMessage());
+        }
+    }
+
+    private void clickDetails() {
+        try {
+            System.out.println("[INFO] Looking for Details button...");
+            By detailsLocator = ios
+                    ? AppiumBy.accessibilityId("Details")
+                    : By.xpath("//*[contains(@content-desc,'Details') or contains(@text,'Details')]");
+
+            WebElement detailsBtn = wait.until(ExpectedConditions.elementToBeClickable(detailsLocator));
+            detailsBtn.click();
+            System.out.println("[SUCCESS] Clicked Details");
+
+            Thread.sleep(2000);
+
+            System.out.println("[INFO] Going back from Details view...");
+            if (!ios) {
+                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+            } else {
+                driver.navigate().back();
+            }
+            Thread.sleep(1000);
+
+        } catch (Exception e) {
+            System.out.println("[WARNING] Could not interact with Details: " + e.getMessage());
         }
     }
 
