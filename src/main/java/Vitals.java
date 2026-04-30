@@ -36,6 +36,7 @@ public class Vitals {
             // Click Vitals History and go back
             clickHistory();
 
+    
             // Go back from Vitals
             goBackFromVitals();
 
@@ -54,25 +55,23 @@ public class Vitals {
 
     private void clickHistory() {
         try {
-            System.out.println("[INFO] Looking for Vitals History ImageView container...");
+            System.out.println("[STEP] Clicking History from Vitals...");
 
-            // The vital card is a single ImageView whose content-desc contains the
-            // reading values followed by a newline and "History" at the end.
-            By historyLocator = ios
+            By locator = ios
                     ? AppiumBy.accessibilityId("History")
-                    : By.xpath("//android.widget.ImageView[contains(@content-desc,'History')]");
+                    : By.xpath("//android.widget.ImageView[contains(@content-desc,'Temperature') or contains(@content-desc,'History')]");
 
-            // presenceOfElementLocated works for Flutter semantic nodes;
-            // elementToBeClickable / visibilityOfElementLocated do not.
-            WebDriverWait shortWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(5));
-            WebElement historyEl = shortWait.until(ExpectedConditions.presenceOfElementLocated(historyLocator));
+            WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+            System.out.println("[DEBUG] Found card: " + element.getAttribute("content-desc"));
 
-            System.out.println("[DEBUG] Found: " + historyEl.getAttribute("content-desc"));
+            // The card content-desc has 6 semantic lines with History at the bottom.
+            // Tap at center-x, 92% of height to land on the History button row.
+            int x = element.getLocation().getX() + element.getSize().getWidth() / 2;
+            int y = element.getLocation().getY() + (int)(element.getSize().getHeight() * 0.92);
+            System.out.println("[DEBUG] Tapping at (" + x + ", " + y + ")");
 
-            int x = historyEl.getLocation().getX() + historyEl.getSize().getWidth() / 2;
-            int y = historyEl.getLocation().getY() + historyEl.getSize().getHeight() / 2;
             driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-            System.out.println("[SUCCESS] Clicked Vitals History container");
+            System.out.println("[SUCCESS] Clicked History");
 
             Thread.sleep(2000);
 
@@ -85,7 +84,8 @@ public class Vitals {
             Thread.sleep(1000);
 
         } catch (Exception e) {
-            System.out.println("[WARNING] Vitals History not found, skipping: " + e.getMessage());
+            System.out.println("[ERROR] History click failed: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
