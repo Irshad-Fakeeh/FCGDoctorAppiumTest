@@ -56,10 +56,12 @@ public class Vitals {
         try {
             System.out.println("[INFO] Looking for Vitals History tab/button...");
             By historyLocator = ios
-                    ? AppiumBy.accessibilityId("Vitals History")
-                    : By.xpath("//*[contains(@content-desc,'Vitals History') or contains(@content-desc,'History') or contains(@text,'History')]");
+                    ? AppiumBy.accessibilityId("History")
+                    : By.xpath("//*[contains(@content-desc,'History') or contains(@text,'History')]");
 
-            WebElement historyTab = wait.until(ExpectedConditions.elementToBeClickable(historyLocator));
+            // Short wait so a missing button fails fast instead of blocking 30s
+            WebDriverWait shortWait = new WebDriverWait(driver, java.time.Duration.ofSeconds(5));
+            WebElement historyTab = shortWait.until(ExpectedConditions.elementToBeClickable(historyLocator));
             historyTab.click();
             System.out.println("[SUCCESS] Clicked History inside Vitals");
 
@@ -74,7 +76,9 @@ public class Vitals {
             Thread.sleep(1000);
 
         } catch (Exception e) {
-            System.out.println("[WARNING] Could not interact with History: " + e.getMessage());
+            // History button not present for this patient — skip silently,
+            // goBackFromVitals() in navigateVitals() will still exit the section.
+            System.out.println("[WARNING] Vitals History not found, skipping: " + e.getMessage());
         }
     }
 
