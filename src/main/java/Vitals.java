@@ -7,7 +7,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.util.List;
 
 public class Vitals {
 
@@ -55,20 +54,17 @@ public class Vitals {
 
     private void clickHistory() {
         try {
-            System.out.println("[INFO] Looking for History tab/button...");
-            String beforeActivity = getCurrentActivitySafe();
-            WebElement historyTab = findClickableHistoryElement();
+            System.out.println("[INFO] Looking for Vitals History tab/button...");
+            By historyLocator = ios
+                    ? AppiumBy.accessibilityId("Vitals History")
+                    : By.xpath("//*[contains(@content-desc,'Vitals History') or contains(@content-desc,'History') or contains(@text,'History')]");
+
+            WebElement historyTab = wait.until(ExpectedConditions.elementToBeClickable(historyLocator));
             historyTab.click();
             System.out.println("[SUCCESS] Clicked History inside Vitals");
 
-            Thread.sleep(2000); // Wait for history view to load
+            Thread.sleep(2000);
 
-            String afterActivity = getCurrentActivitySafe();
-            if (beforeActivity != null && afterActivity != null && beforeActivity.equals(afterActivity)) {
-                System.out.println("[WARNING] Vitals history tap did not change the current activity.");
-            }
-
-            // Go back from history view
             System.out.println("[INFO] Going back from History view...");
             if (!ios) {
                 ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
@@ -79,59 +75,6 @@ public class Vitals {
 
         } catch (Exception e) {
             System.out.println("[WARNING] Could not interact with History: " + e.getMessage());
-        }
-    }
-
-    private WebElement findClickableHistoryElement() {
-        List<By> locators = List.of(
-                findVitalsHistoryLocator(),
-                findGenericHistoryLocator());
-
-        for (By locator : locators) {
-            List<WebElement> matches = driver.findElements(locator);
-            for (WebElement match : matches) {
-                try {
-                    if (match.isDisplayed() && match.isEnabled()) {
-                        wait.until(ExpectedConditions.elementToBeClickable(match));
-                        return match;
-                    }
-                } catch (Exception ignored) {
-                    // Try the next match or locator.
-                }
-            }
-        }
-
-        throw new RuntimeException("Could not find a clickable History element in Vitals");
-    }
-
-    private By findVitalsHistoryLocator() {
-        return ios
-                ? AppiumBy.accessibilityId("Vitals History")
-                : By.xpath(
-                        "//*[contains(translate(@content-desc,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'vitals history')"
-                                + " or contains(translate(@text,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'vitals history')]"
-                                + " | //*[contains(translate(@content-desc,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'vitals')"
-                                + " and contains(translate(@content-desc,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'history')]"
-                                + " | //*[contains(translate(@text,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'vitals')"
-                                + " and contains(translate(@text,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'history')]");
-    }
-
-    private By findGenericHistoryLocator() {
-        if (ios) {
-            return AppiumBy.accessibilityId("History");
-        }
-
-        return By.xpath("//*[contains(@content-desc,'History') or contains(@text,'History')]");
-    }
-
-    private String getCurrentActivitySafe() {
-        try {
-            if (!ios) {
-                return ((AndroidDriver) driver).currentActivity();
-            }
-            return null;
-        } catch (Exception e) {
-            return null;
         }
     }
 
