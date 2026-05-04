@@ -7,6 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import java.util.List;
 
 public class Vitals {
 
@@ -59,33 +60,42 @@ public class Vitals {
 
             By locator = ios
                     ? AppiumBy.accessibilityId("History")
-                    : By.xpath("//android.widget.ImageView[contains(@content-desc,'Temperature') or contains(@content-desc,'History')]");
+                    : By.xpath("//android.widget.ImageView[contains(@content-desc,'Temperature')" +
+                               " or contains(@content-desc,'History')]");
 
             WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
             System.out.println("[DEBUG] Found card: " + element.getAttribute("content-desc"));
 
-            // The card content-desc has 6 semantic lines with History at the bottom.
-            // Tap at center-x, 92% of height to land on the History button row.
-            int x = element.getLocation().getX() + element.getSize().getWidth() / 2;
-            int y = element.getLocation().getY() + (int)(element.getSize().getHeight() * 0.92);
-            System.out.println("[DEBUG] Tapping at (" + x + ", " + y + ")");
+            int cardLeft = element.getLocation().getX();
+            int cardTop  = element.getLocation().getY();
+            int cardW    = element.getSize().getWidth();
+            int cardH    = element.getSize().getHeight();
+
+            int x = cardLeft + cardW / 2;
+            int y = cardTop  + (int)(cardH * 0.92);
+            System.out.println("[DEBUG] Tapping at (" + x + ", " + y + "), cardH=" + cardH);
 
             driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-            System.out.println("[SUCCESS] Clicked History");
 
             Thread.sleep(2000);
 
-            System.out.println("[INFO] Going back from History view...");
-            if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+            // Only press BACK if we actually navigated into History (card disappeared).
+            // If tap missed, card is still present — skip BACK so goBackFromVitals() exits cleanly.
+            List<WebElement> check = driver.findElements(locator);
+            if (check.isEmpty()) {
+                System.out.println("[SUCCESS] Navigated to History — pressing BACK to return");
+                if (!ios) {
+                    ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+                } else {
+                    driver.navigate().back();
+                }
+                Thread.sleep(1000);
             } else {
-                driver.navigate().back();
+                System.out.println("[INFO] History tap did not navigate — skipping BACK press");
             }
-            Thread.sleep(1000);
 
         } catch (Exception e) {
-            System.out.println("[ERROR] History click failed: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("[WARNING] clickHistory failed: " + e.getMessage());
         }
     }
 
