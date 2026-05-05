@@ -65,6 +65,13 @@ public class LoginTest {
         CriticalOutPatientPage outpatientPage = new CriticalOutPatientPage(driver, wait, "ios".equals(platform));
         outpatientPage.testCriticalOutpatient();
 
+        System.out.println("Navigating to Highcare section...");
+        homePage.clickHighcare();
+        Thread.sleep(3000);
+
+        HighcarePage highcarePage = new HighcarePage(driver, wait, "ios".equals(platform));
+        highcarePage.testHighcare();
+
         // Now navigate to notifications page - test notifications
         NotificationsPage notificationsPage = new NotificationsPage(driver, wait, "ios".equals(platform));
         notificationsPage.testNotifications();

@@ -5,6 +5,7 @@ ProfilePage.class
 CurrentInPatientPage.class
 ClinicalNotesPage.class
 CurrentMedicationPage.class
+HighcarePage.class
 LabPage.class
 CriticalOutPatientPage.class
 NotificationsPage.class

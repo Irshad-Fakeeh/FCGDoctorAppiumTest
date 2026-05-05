@@ -79,6 +79,11 @@ public class HomePage {
         tapDashboardCard("Critical Outpatients");
     }
 
+    // 🔹 Highcare
+    public void clickHighcare() throws InterruptedException {
+        tapDashboardCard("High care");
+    }
+
     /**
      * Flutter accessibility nodes fail visibilityOfElementLocated (isDisplayed=false).
      * Strategy: presenceOfElementLocated finds the element, then we validate its Y

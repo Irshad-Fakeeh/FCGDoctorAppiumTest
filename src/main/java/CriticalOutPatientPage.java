@@ -66,7 +66,7 @@ public class CriticalOutPatientPage {
             // 4 BACKs: PDF → History → Lab Reports → Patient List → Dashboard
             goBackFromPdfViewer();
             goBackFromHistory();
-            goBackFromOutPatientDetails();
+            // goBackFromOutPatientDetails();
             Thread.sleep(1000);
             goBackToHomePage();
             Thread.sleep(1000);
