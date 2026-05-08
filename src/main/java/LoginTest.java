@@ -32,16 +32,16 @@ public class LoginTest {
 
         // Now on homepage, click notifications
         HomePage homePage = new HomePage(driver, wait, "ios".equals(platform));
-        // homePage.clickProfileAvatar();
+        homePage.clickProfileAvatar();
 
-        // System.out.println("Waiting for profile page to load...");
-        // Thread.sleep(5000); // Wait for navigation
+        System.out.println("Waiting for profile page to load...");
+        Thread.sleep(5000); // Wait for navigation
 
-        // // Perform the full profile test sequence
-        // ProfilePage profilePage = new ProfilePage(driver, wait,
-        // "ios".equals(platform));
-        // profilePage.performFullProfileTest();
-        // Thread.sleep(2000);
+        // Perform the full profile test sequence
+        ProfilePage profilePage = new ProfilePage(driver, wait,
+        "ios".equals(platform));
+        profilePage.performFullProfileTest();
+        Thread.sleep(2000);
 
         System.out.println("Toggling appointment status chart to monthly...");
         homePage.toggleAppointmentChartView();

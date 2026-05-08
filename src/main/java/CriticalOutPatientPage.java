@@ -3,10 +3,12 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
 import java.util.List;
 
 public class CriticalOutPatientPage {
@@ -15,98 +17,95 @@ public class CriticalOutPatientPage {
     private final WebDriverWait wait;
     private final boolean ios;
 
-    public CriticalOutPatientPage(AppiumDriver driver, WebDriverWait wait, boolean ios) {
+    public CriticalOutPatientPage(AppiumDriver driver,
+                                  WebDriverWait wait,
+                                  boolean ios) {
+
         this.driver = driver;
         this.wait = wait;
         this.ios = ios;
     }
 
-    public void testCriticalOutpatient() throws InterruptedException {
-        By itemsLocator = ios
-                ? By.xpath("//XCUIElementTypeCell")
-                : By.xpath("//android.view.View[@content-desc]");
+    public void testCriticalOutpatient() {
 
         try {
-            System.out.println("[INFO] Waiting for critical out-patient list to load...");
+
+            System.out.println("[INFO] Waiting for critical out-patient list...");
             Thread.sleep(2000);
 
-            List<WebElement> items = driver.findElements(itemsLocator);
-            System.out.println("[INFO] Found " + items.size() + " items on critical out-patient list");
+        By itemsLocator = ios
+        ? By.xpath("//XCUIElementTypeCell")
+        : By.xpath("//android.view.View[contains(@content-desc,'MRN -')]");
+
+        wait.until(driver -> driver.findElements(itemsLocator).size() > 0);
+
+        List<WebElement> items = driver.findElements(itemsLocator);
+
+        System.out.println("[INFO] Found " + items.size() + " patients");
 
             if (items.isEmpty()) {
-                System.out.println("[INFO] No critical out-patient available — returning to home");
+                System.out.println("[INFO] No patients found — returning to Home");
                 goBackToHomePage();
                 return;
             }
 
-            // Log first few items so we can confirm which element is being tapped
-            for (int i = 0; i < Math.min(items.size(), 4); i++) {
-                System.out.println("[DEBUG] items[" + i + "] content-desc: "
-                        + items.get(i).getAttribute("content-desc"));
-            }
-
-            // Index 1 skips any header row at index 0 — first patient item
-            int targetIndex = (items.size() > 1) ? 1 : 0;
-            WebElement targetItem = items.get(targetIndex);
+            // Debug and tap first patient
+            WebElement targetItem = items.get(0);
+            String desc = targetItem.getAttribute("content-desc");
+            System.out.println("[DEBUG] First patient desc: " + (desc != null ? desc.replace("\n", "\\n") : "null"));
+            System.out.println("[DEBUG] First patient bounds: " + targetItem.getAttribute("bounds"));
 
             int px = targetItem.getLocation().getX() + targetItem.getSize().getWidth() / 2;
             int py = targetItem.getLocation().getY() + targetItem.getSize().getHeight() / 2;
-            System.out.println("[DEBUG] Tapping patient[" + targetIndex + "] at (" + px + ", " + py + ")");
+            System.out.println("[DEBUG] Tapping patient[0] at (" + px + ", " + py + ")");
             driver.executeScript("mobile: clickGesture", java.util.Map.of("x", px, "y", py));
-            System.out.println("[SUCCESS] Tapped critical out-patient");
-            Thread.sleep(3000); // wait for Lab Reports page to fully load
+            System.out.println("[SUCCESS] Tapped patient[0]");
+            Thread.sleep(3000);
 
-            // Click History tab (may be off-screen, swipe handles it)
+            // Verify navigation
+            List<WebElement> afterTap = driver.findElements(itemsLocator);
+            if (afterTap.isEmpty()) {
+                System.out.println("[SUCCESS] Navigated to lab list");
+            } else {
+                System.out.println("[WARNING] Still on patient list (" + afterTap.size() + " items) — tap did not navigate");
+            }
+
+            // ✅ Click History
             clickHistory();
-            Thread.sleep(3000); // wait for History list to render
+            Thread.sleep(3000);
 
-            // Click PDF placeholder (scrolls down first, then taps)
+            // ✅ Click PDF
             clickPdf();
 
-            // 4 BACKs: PDF → History → Lab Reports → Patient List → Dashboard
+            // ✅ Back flows
             goBackFromPdfViewer();
             goBackFromHistory();
-            // goBackFromOutPatientDetails();
-            Thread.sleep(1000);
+            goBackFromOutPatientDetails();
             goBackToHomePage();
-            Thread.sleep(1000);
 
         } catch (Exception e) {
-            System.out.println("[ERROR] Critical out-patient test failed: " + e.getMessage());
+
+            System.out.println("[ERROR] Critical out-patient test failed");
             e.printStackTrace();
         }
     }
 
     public void clickHistory() {
+
         try {
-            System.out.println("[INFO] Looking for History tab...");
+
+            System.out.println("[INFO] Looking for History...");
 
             By locator = ios
                     ? AppiumBy.accessibilityId("History")
-                    : By.xpath("//*[contains(@content-desc,'History') or contains(@text,'History')]");
+                    : By.xpath("//*[contains(@content-desc,'History')]");
 
-            // Instant check — no 30s block
             List<WebElement> found = driver.findElements(locator);
 
             if (found.isEmpty()) {
-                // History tab is off-screen to the right — swipe left in the tab bar area
-                System.out.println("[INFO] History not visible — swiping tab bar to reveal it...");
-                int screenW = driver.manage().window().getSize().getWidth();
-                int screenH = driver.manage().window().getSize().getHeight();
-                driver.executeScript("mobile: swipeGesture", java.util.Map.ofEntries(
-                        java.util.Map.entry("left",      (int)(screenW * 0.8)),
-                        java.util.Map.entry("top",       (int)(screenH * 0.35)),
-                        java.util.Map.entry("width",     (int)(screenW * 0.6)),
-                        java.util.Map.entry("height",    50),
-                        java.util.Map.entry("direction", "left"),
-                        java.util.Map.entry("percent",   0.8),
-                        java.util.Map.entry("speed",     400)));
-                try { Thread.sleep(800); } catch (InterruptedException ignored) {}
-                found = driver.findElements(locator);
-            }
 
-            if (found.isEmpty()) {
-                System.out.println("[INFO] History tab not found — skipping");
+                System.out.println("[INFO] History not visible");
+
                 return;
             }
 
@@ -115,122 +114,130 @@ public class CriticalOutPatientPage {
             int y = element.getLocation().getY() + element.getSize().getHeight() / 2;
             System.out.println("[DEBUG] Tapping History at (" + x + ", " + y + ")");
             driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-            System.out.println("[SUCCESS] History tab clicked");
+            System.out.println("[SUCCESS] History tapped");
 
         } catch (Exception e) {
-            System.out.println("[ERROR] History click failed: " + e.getMessage());
+
+            System.out.println("[ERROR] History click failed");
             e.printStackTrace();
         }
     }
 
     public void clickPdf() {
+
         try {
-            int screenW = driver.manage().window().getSize().getWidth();
-            int screenH = driver.manage().window().getSize().getHeight();
 
-            // Scroll down so the PDF placeholder is within the viewport
-            System.out.println("[INFO] Scrolling down to PDF placeholder...");
-            driver.executeScript("mobile: swipeGesture", java.util.Map.ofEntries(
-                    java.util.Map.entry("left",      screenW / 2 - 50),
-                    java.util.Map.entry("top",       (int)(screenH * 0.70)),
-                    java.util.Map.entry("width",     100),
-                    java.util.Map.entry("height",    (int)(screenH * 0.40)),
-                    java.util.Map.entry("direction", "up"),
-                    java.util.Map.entry("percent",   0.7),
-                    java.util.Map.entry("speed",     500)));
-            Thread.sleep(1000);
+            System.out.println("[INFO] Looking for PDF...");
 
-            System.out.println("[INFO] Looking for PDF placeholder...");
-            // 2nd ImageView sibling after the lab result view (confirmed from Inspector hierarchy)
             By locator = ios
                     ? AppiumBy.accessibilityId("pdf_icon")
-                    : By.xpath("//android.view.View[contains(@content-desc,'Reference Range')]" +
-                               "/following-sibling::android.widget.ImageView[2]");
+                    : By.xpath(
+                    "//android.view.View[contains(@content-desc,'Reference Range')]"
+                            + "/following-sibling::android.widget.ImageView[2]"
+            );
 
-            WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+            WebElement element = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(locator)
+            );
+
             int x = element.getLocation().getX() + element.getSize().getWidth() / 2;
             int y = element.getLocation().getY() + element.getSize().getHeight() / 2;
-            System.out.println("[DEBUG] PDF element at (" + x + ", " + y +
-                    "), size=" + element.getSize().getWidth() + "x" + element.getSize().getHeight());
-
+            System.out.println("[DEBUG] Tapping PDF at (" + x + ", " + y + ")");
             driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
-            System.out.println("[SUCCESS] PDF placeholder tapped — waiting for report to load");
+            System.out.println("[SUCCESS] PDF tapped");
+
             Thread.sleep(5000);
-            System.out.println("[INFO] PDF report loaded and shown");
 
         } catch (Exception e) {
-            System.out.println("[ERROR] PDF click failed: " + e.getMessage());
+
+            System.out.println("[ERROR] PDF click failed");
             e.printStackTrace();
         }
     }
 
     private void goBackFromPdfViewer() {
+
         try {
-            System.out.println("[DEBUG] Going back from PDF viewer");
+
+            System.out.println("[INFO] Going back from PDF viewer");
+
             if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+                ((AndroidDriver) driver)
+                        .pressKey(new KeyEvent(AndroidKey.BACK));
             } else {
                 driver.navigate().back();
             }
+
             Thread.sleep(1000);
-            System.out.println("[SUCCESS] Returned from PDF viewer");
+
         } catch (Exception e) {
-            System.out.println("[WARNING] Could not go back from PDF viewer: " + e.getMessage());
+
+            System.out.println("[WARNING] Could not go back from PDF viewer");
         }
     }
 
     private void goBackFromHistory() {
+
         try {
-            System.out.println("[DEBUG] Going back from History screen");
+
+            System.out.println("[INFO] Going back from History");
+
             if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+                ((AndroidDriver) driver)
+                        .pressKey(new KeyEvent(AndroidKey.BACK));
             } else {
                 driver.navigate().back();
             }
+
             Thread.sleep(1000);
-            System.out.println("[SUCCESS] Returned from History screen");
+
         } catch (Exception e) {
-            System.out.println("[WARNING] Could not go back from History: " + e.getMessage());
+
+            System.out.println("[WARNING] Could not go back from History");
         }
     }
 
     public void goBackFromOutPatientDetails() {
+
         try {
-            System.out.println("[DEBUG] Going back from out-patient details");
+
+            System.out.println("[INFO] Going back from patient details");
+
             if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+                ((AndroidDriver) driver)
+                        .pressKey(new KeyEvent(AndroidKey.BACK));
             } else {
                 driver.navigate().back();
             }
-            System.out.println("[SUCCESS] Returned from critical out-patient details");
+
+            Thread.sleep(1000);
+
         } catch (Exception e) {
-            System.out.println("[WARNING] Could not go back from out-patient details: " + e.getMessage());
+
+            System.out.println("[WARNING] Could not go back from details");
         }
     }
 
     public void goBackToHomePage() {
+
         try {
+
+            System.out.println("[INFO] Going back to Home");
+
             if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+                ((AndroidDriver) driver)
+                        .pressKey(new KeyEvent(AndroidKey.BACK));
             } else {
                 driver.navigate().back();
             }
-            System.out.println("[SUCCESS] Navigated to Home via Back press");
-        } catch (Exception e) {
-            System.out.println("[WARNING] Home navigation failed: " + e.getMessage());
-        }
-    }
 
-    public void clickViewEMRButton() {
-        try {
-            By locator = ios ? AppiumBy.accessibilityId("View EMR")
-                    : By.xpath("//android.widget.ImageView[@content-desc='View EMR']");
-            System.out.println("[INFO] Looking for View EMR button...");
-            WebElement viewEMRBtn = wait.until(ExpectedConditions.elementToBeClickable(locator));
-            viewEMRBtn.click();
-            System.out.println("[SUCCESS] Clicked View EMR button");
+            Thread.sleep(1000);
+
+            System.out.println("[SUCCESS] Returned to Home");
+
         } catch (Exception e) {
-            System.out.println("[WARNING] Could not click View EMR button: " + e.getMessage());
+
+            System.out.println("[WARNING] Home navigation failed");
         }
     }
 }
