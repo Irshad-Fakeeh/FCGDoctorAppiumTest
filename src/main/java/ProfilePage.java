@@ -7,8 +7,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class ProfilePage {
 
@@ -22,204 +20,123 @@ public class ProfilePage {
         this.ios = ios;
     }
 
+    // Flutter-safe tap: presenceOfElementLocated + coordinate gesture
+    private boolean flutterTap(By locator, String label) {
+        try {
+            WebElement el = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+            int x = el.getLocation().getX() + el.getSize().getWidth() / 2;
+            int y = el.getLocation().getY() + el.getSize().getHeight() / 2;
+            System.out.println("[DEBUG] Tapping " + label + " at (" + x + ", " + y + ")");
+            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+            System.out.println("[SUCCESS] Tapped " + label);
+            return true;
+        } catch (Exception e) {
+            System.out.println("[WARNING] Could not tap " + label + ": " + e.getMessage());
+            return false;
+        }
+    }
 
+    private void pressBack() {
+        try {
+            if (!ios) {
+                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+            } else {
+                driver.navigate().back();
+            }
+        } catch (Exception e) {
+            System.out.println("[WARNING] Back press failed: " + e.getMessage());
+        }
+    }
 
-    /**
-     * Clicks the profile image in the profile screen to open the image dialog.
-     */
     public void clickProfileImage() {
         By locator = ios
                 ? AppiumBy.accessibilityId("profile_image")
                 : By.xpath("(//android.widget.ScrollView//android.widget.ImageView)[1]");
-
-        WebElement image = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        image.click();
+        flutterTap(locator, "Profile Image");
     }
 
-    /**
-     * Closes the profile image dialog by pressing the back key (taps outside or dismisses dialog).
-     */
     public void closeProfileImageDialog() {
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            // For iOS, perhaps press back or find another way
-            // Assuming back key works or add iOS specific
-            driver.navigate().back();
-        }
+        pressBack();
     }
 
-    /**
-     * Clicks the QR code in the profile screen.
-     */
     public void clickQRCode() {
         By locator = ios
                 ? AppiumBy.accessibilityId("qr_code")
                 : By.xpath("(//android.widget.ScrollView//android.widget.ImageView)[2]");
-
-        WebElement qrCode = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        qrCode.click();
+        flutterTap(locator, "QR Code");
     }
 
-    /**
-     * Closes the QR code dialog by pressing the back key.
-     */
     public void closeQRDialog() {
-        try {
-            if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-            } else {
-                driver.navigate().back();
-            }
-            System.out.println("[SUCCESS] Closed QR dialog");
-        } catch (Exception e) {
-            System.out.println("[WARNING] Could not close QR dialog: " + e.getMessage());
-        }
+        pressBack();
+        System.out.println("[SUCCESS] Closed QR dialog");
     }
 
-    /**
-     * Clicks the Change Language item in the profile screen to toggle between English and Arabic.
-     */
     public void clickChangeLanguage() {
         By locator = ios
                 ? AppiumBy.accessibilityId("change_language")
                 : By.xpath("//*[contains(@content-desc,'change_language') or contains(@content-desc,'Change Language')]");
-        WebElement changeLanguage = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        changeLanguage.click();
+        flutterTap(locator, "Change Language");
     }
 
-    /**
-     * Closes the language dialog by pressing the back key.
-     */
     public void closeLanguageDialog() {
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            driver.navigate().back();
-        }
+        pressBack();
     }
 
-    /**
-     * Selects Arabic from the language dialog.
-     */
     public void selectArabic() {
         By locator = ios
                 ? AppiumBy.accessibilityId("arabic")
                 : By.xpath("//*[contains(@content-desc,'العربية')]");
-
-        try {
-            WebElement arabic = wait.until(ExpectedConditions.elementToBeClickable(locator));
-            arabic.click();
-        } catch (Exception e) {
-            System.out.println("Failed to find Arabic element. Saving page source to page_source.xml");
-            try (FileWriter fw = new FileWriter("page_source.xml")) {
-                fw.write(driver.getPageSource());
-            } catch (IOException io) {
-                System.out.println("Failed to save page source: " + io.getMessage());
-            }
-            throw e;
-        }
+        flutterTap(locator, "Arabic");
     }
 
-    /**
-     * Selects English from the language dialog.
-     */
     public void selectEnglish() {
         By locator = ios
                 ? AppiumBy.accessibilityId("english")
                 : By.xpath("//*[contains(@content-desc,'English')]");
-
-        WebElement english = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        english.click();
+        flutterTap(locator, "English");
     }
 
-    /**
-     * Clicks the Screen Mode item in the profile screen.
-     */
     public void clickScreenMode() {
         By locator = ios
                 ? AppiumBy.accessibilityId("screen_mode")
                 : By.xpath("//*[contains(@content-desc,'screen_mode') or contains(@content-desc,'Screen Mode')]");
-
-        WebElement screenMode = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        screenMode.click();
+        flutterTap(locator, "Screen Mode");
     }
 
-    /**
-     * Selects Dark theme from the screen mode dialog.
-     */
     public void selectDarkTheme() {
         By locator = ios
                 ? AppiumBy.accessibilityId("theme_dark")
                 : By.xpath("//*[contains(@content-desc,'theme_dark') or contains(@content-desc,'Dark')]");
-
-        WebElement dark = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        dark.click();
+        flutterTap(locator, "Dark Theme");
     }
 
-    /**
-     * Selects Device theme from the screen mode dialog.
-     */
     public void selectDeviceTheme() {
         By locator = ios
                 ? AppiumBy.accessibilityId("theme_device")
                 : By.xpath("//*[contains(@content-desc,'theme_device') or contains(@content-desc,'Device')]");
-        WebElement device = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        device.click();
+        flutterTap(locator, "Device Theme");
     }
 
-    /**
-     * Closes the screen mode dialog by pressing the back key.
-     */
     public void closeScreenModeDialog() {
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            driver.navigate().back();
-        }
+        pressBack();
     }
 
-    /**
-     * Clicks the Privacy Policy item in the profile screen.
-     */
     public void clickPrivacyPolicy() {
-        try {
-            By locator = ios
-                    ? AppiumBy.accessibilityId("privacy_policy")
-                    : By.xpath("//*[contains(@content-desc,'privacy_policy') or contains(@content-desc,'Privacy')]");
-
-            WebElement privacyPolicy = wait.until(
-                    ExpectedConditions.elementToBeClickable(locator)
-            );
-
-            privacyPolicy.click();
-            System.out.println("[SUCCESS] Clicked Privacy Policy");
-        } catch (Exception e) {
-            System.out.println("[WARNING] Could not click Privacy Policy: " + e.getMessage());
-        }
+        By locator = ios
+                ? AppiumBy.accessibilityId("privacy_policy")
+                : By.xpath("//*[contains(@content-desc,'privacy_policy') or contains(@content-desc,'Privacy')]");
+        flutterTap(locator, "Privacy Policy");
     }
 
- public void closePrivacyPolicy() {
-        try {
-            if (!ios) {
-                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-            } else {
-                driver.navigate().back();
-            }
-            System.out.println("[SUCCESS] Closed Privacy Policy dialog");
-        } catch (Exception e) {
-            System.out.println("[WARNING] Could not close Privacy Policy dialog: " + e.getMessage());
-        }
+    public void closePrivacyPolicy() {
+        pressBack();
+        System.out.println("[SUCCESS] Closed Privacy Policy");
     }
 
-    /**
-     * Verifies the Profile & Settings screen is visible.
-     */
     public boolean isProfileScreenVisible() {
         By locator = ios
                 ? By.xpath("//*[@name='Profile & Settings']")
                 : By.xpath("//*[@text='Profile & Settings']");
-
         try {
             wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
             return true;
@@ -228,91 +145,44 @@ public class ProfilePage {
         }
     }
 
-    /**
-     * Performs the full profile test sequence: image, QR, privacy, language, screen mode.
-     * After completion, redirects to Notifications from the bottom navigation.
-     */
     public void performFullProfileTest() throws InterruptedException {
 
-        // Click the profile image in the profile screen
         clickProfileImage();
-
-        System.out.println("Waiting for image dialog to open...");
-        Thread.sleep(3000); // Wait for dialog
-
-        // Close the profile image dialog
+        System.out.println("[INFO] Waiting for image dialog...");
+        Thread.sleep(3000);
         closeProfileImageDialog();
-
-        System.out.println("Waiting after closing image dialog...");
         Thread.sleep(2000);
 
-        // Click the QR code in the profile screen
         clickQRCode();
-
-        System.out.println("Waiting for QR dialog to open...");
-        Thread.sleep(3000); // Wait for dialog
-
-        // Close the QR dialog
+        System.out.println("[INFO] Waiting for QR dialog...");
+        Thread.sleep(3000);
         closeQRDialog();
-
-        System.out.println("Waiting after closing QR dialog...");
         Thread.sleep(4000);
 
-        // Click the Privacy Policy in the profile screen
         clickPrivacyPolicy();
-
-        System.out.println("Clicked Privacy Policy. Pressing back to return to profile...");
-        Thread.sleep(3000); // Wait for privacy policy to open
-
+        System.out.println("[INFO] Waiting for Privacy Policy...");
+        Thread.sleep(3000);
         closePrivacyPolicy();
-        
-        // // Press back to close privacy policy and return to profile
-        // if (!ios) {
-        //     ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        // } else {
-        //     driver.navigate().back();
-        // }
-
-        System.out.println("Waiting after back from privacy policy...");
         Thread.sleep(2000);
 
-        // Click the Change Language in the profile screen
         clickChangeLanguage();
-
-        System.out.println("Opened language dialog. Selecting Arabic...");
+        System.out.println("[INFO] Opened language dialog...");
         Thread.sleep(2000);
-
-        // Close the language dialog
         closeLanguageDialog();
-
-        System.out.println("Closed dialog. Waiting...");
         Thread.sleep(2000);
 
-        // Click Screen Mode
         clickScreenMode();
-
-        System.out.println("Opened screen mode dialog. Selecting Dark...");
+        System.out.println("[INFO] Opened screen mode dialog...");
         Thread.sleep(2000);
-
-        // Select Dark
         selectDarkTheme();
-
-        System.out.println("Selected Dark. Selecting Device...");
         Thread.sleep(2000);
 
         clickScreenMode();
-
-        // Select Device
-        selectDeviceTheme();
-
-        System.out.println("Selected Device. Closing dialog...");
         Thread.sleep(2000);
-
-        // Close the screen mode dialog
+        selectDeviceTheme();
+        Thread.sleep(2000);
         closeScreenModeDialog();
 
-        System.out.println("Profile test sequence completed. Session remains open for further inspection.");
-        // Keep the session open - remove driver.quit() to prevent closing
-
+        System.out.println("[INFO] Profile test sequence completed.");
     }
 }
