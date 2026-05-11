@@ -32,16 +32,7 @@ public class LoginTest {
 
         // Now on homepage, click notifications
         HomePage homePage = new HomePage(driver, wait, "ios".equals(platform));
-        homePage.clickProfileAvatar();
-
-        System.out.println("Waiting for profile page to load...");
-        Thread.sleep(5000); // Wait for navigation
-
-        // Perform the full profile test sequence
-        ProfilePage profilePage = new ProfilePage(driver, wait,
-        "ios".equals(platform));
-        profilePage.performFullProfileTest();
-        Thread.sleep(2000);
+        
 
         System.out.println("Toggling appointment status chart to monthly...");
         homePage.toggleAppointmentChartView();
@@ -72,9 +63,6 @@ public class LoginTest {
         HighcarePage highcarePage = new HighcarePage(driver, wait, "ios".equals(platform));
         highcarePage.testHighcare();
 
-        // Now navigate to notifications page - test notifications
-        NotificationsPage notificationsPage = new NotificationsPage(driver, wait, "ios".equals(platform));
-        notificationsPage.testNotifications();
 
         System.out.println("Navigating to View All appointments...");
         Thread.sleep(2000);
@@ -84,9 +72,20 @@ public class LoginTest {
         SchedulePage schedulePage = new SchedulePage(driver, wait, "ios".equals(platform));
         schedulePage.testSchedulePage();
 
-        System.out.println("Navigating back to Home page...");
-        homePage.clickHomeFromBottomNav();
+        // Navigate to notifications, test, then return to Home
+        NotificationsPage notificationsPage = new NotificationsPage(driver, wait, "ios".equals(platform));
+        notificationsPage.testNotifications();
+        // testNotifications() ends by navigating to Home via bottom nav
         Thread.sleep(3000);
+
+        // Profile flow — click avatar from Home
+        System.out.println("Navigating to Profile...");
+        homePage.clickProfileAvatar();
+        Thread.sleep(5000);
+
+        ProfilePage profilePage = new ProfilePage(driver, wait, "ios".equals(platform));
+        profilePage.performFullProfileTest();
+        Thread.sleep(2000);
 
         System.out.println("All test sequences are completed. Session remains open for further inspection.");
         Thread.sleep(5000);

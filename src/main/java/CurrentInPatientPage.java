@@ -51,7 +51,7 @@ public class CurrentInPatientPage {
             int targetIndex;
 
             if (items.size() >= 5) {
-                targetIndex = 4; // index 4 = 5th patient
+                targetIndex = 2; // index 2 = 3rd patient
                 System.out.println("[INFO] Clicking 5th patient (index 4)");
             } else {
                 targetIndex = items.size() - 1;

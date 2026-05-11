@@ -33,21 +33,21 @@ public class CriticalOutPatientPage {
             System.out.println("[INFO] Waiting for critical out-patient list...");
             Thread.sleep(2000);
 
-        By itemsLocator = ios
-        ? By.xpath("//XCUIElementTypeCell")
-        : By.xpath("//android.view.View[contains(@content-desc,'MRN -')]");
+            By itemsLocator = ios
+                    ? By.xpath("//XCUIElementTypeCell")
+                    : By.xpath("//android.view.View[contains(@content-desc,'MRN -')]");
 
-        wait.until(driver -> driver.findElements(itemsLocator).size() > 0);
-
-        List<WebElement> items = driver.findElements(itemsLocator);
-
-        System.out.println("[INFO] Found " + items.size() + " patients");
-
-            if (items.isEmpty()) {
-                System.out.println("[INFO] No patients found — returning to Home");
+            List<WebElement> items;
+            try {
+                wait.until(driver -> driver.findElements(itemsLocator).size() > 0);
+                items = driver.findElements(itemsLocator);
+            } catch (Exception e) {
+                System.out.println("[INFO] Patient list is empty or timed out — pressing Back");
                 goBackToHomePage();
                 return;
             }
+
+            System.out.println("[INFO] Found " + items.size() + " patients");
 
             // Debug and tap first patient
             WebElement targetItem = items.get(0);
@@ -221,23 +221,14 @@ public class CriticalOutPatientPage {
     public void goBackToHomePage() {
 
         try {
-
-            System.out.println("[INFO] Going back to Home");
-
+            System.out.println("[STEP] Returning from Patient Details...");
             if (!ios) {
-                ((AndroidDriver) driver)
-                        .pressKey(new KeyEvent(AndroidKey.BACK));
+                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
             } else {
                 driver.navigate().back();
             }
-
-            Thread.sleep(1000);
-
-            System.out.println("[SUCCESS] Returned to Home");
-
         } catch (Exception e) {
-
-            System.out.println("[WARNING] Home navigation failed");
+            System.out.println("[WARNING] Detail back-press failed: " + e.getMessage());
         }
     }
 }

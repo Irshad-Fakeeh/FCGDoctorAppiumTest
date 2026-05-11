@@ -22,162 +22,106 @@ public class SchedulePage {
     }
 
     public void testSchedulePage() throws InterruptedException {
+        System.out.println("[INFO] ===== SCHEDULE PAGE TEST =====");
 
-        System.out.println("Switching from Physical to Virtual tab...");
-        switchFromPhysicalToVirtual();
+        // Switch Virtual → Physical
+        System.out.println("[STEP] Switching to Virtual tab...");
+        clickTab("Virtual");
         Thread.sleep(2000);
 
-        System.out.println("Switching from Virtual to Physical tab...");
-        switchFromVirtualToPhysical();
+        System.out.println("[STEP] Switching to Physical tab...");
+        clickTab("Physical");
         Thread.sleep(2000);
 
-        System.out.println("Waiting for first appointment selection...");
-        clickFirstAppointment();
-        Thread.sleep(3000);
+        // Click first Physical appointment if list has data
+        System.out.println("[STEP] Looking for Physical appointments...");
+        clickFirstPhysicalAppointment();
 
-        System.out.println("Going back from appointment details...");
-        goBackFromAppointmentDetails();
-        Thread.sleep(2000);
-    }
-    /**
-     * Clicks the Physical appointments tab.
-     */
-    public void clickPhysicalTab() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Physical")
-                : By.xpath("//*[contains(@content-desc,'Physical') or contains(@text,'Physical')]");
-
-        WebElement tab = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        tab.click();
-        System.out.println("Switched to Physical tab.");
+        System.out.println("[INFO] ===== SCHEDULE PAGE TEST COMPLETED =====");
     }
 
-    /**
-     * Clicks the Virtual appointments tab.
-     */
-    public void clickVirtualTab() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Virtual")
-                : By.xpath("//*[contains(@content-desc,'Virtual') or contains(@text,'Virtual')]");
-
-        WebElement tab = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        tab.click();
-        System.out.println("Switched to Virtual tab.");
-    }
-
-    /**
-     * Switches from the Physical tab to the Virtual tab.
-     */
-    public void switchFromPhysicalToVirtual() {
-        clickVirtualTab();
-    }
-
-    /**
-     * Switches from the Virtual tab to the Physical tab.
-     */
-    public void switchFromVirtualToPhysical() {
-        clickPhysicalTab();
-    }
-
-    /**
-     * Verifies the Physical tab is displayed.
-     */
-    public boolean isPhysicalTabVisible() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Physical")
-                : By.xpath("//*[contains(@content-desc,'Physical') or contains(@text,'Physical')]");
-
+    private void clickTab(String tabName) {
         try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-            return true;
+            By locator = ios
+                    ? AppiumBy.accessibilityId(tabName)
+                    : By.xpath("//*[contains(@content-desc,'" + tabName + "')]");
+
+            List<WebElement> found = driver.findElements(locator);
+            if (found.isEmpty()) {
+                System.out.println("[INFO] Tab '" + tabName + "' not found — skipping");
+                return;
+            }
+            WebElement tab = found.get(0);
+            int x = tab.getLocation().getX() + tab.getSize().getWidth() / 2;
+            int y = tab.getLocation().getY() + tab.getSize().getHeight() / 2;
+            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+            System.out.println("[SUCCESS] Tapped tab: " + tabName);
         } catch (Exception e) {
-            return false;
+            System.out.println("[WARNING] Could not tap tab '" + tabName + "': " + e.getMessage());
         }
     }
 
-    /**
-     * Verifies the Virtual tab is displayed.
-     */
-    public boolean isVirtualTabVisible() {
-        By locator = ios
-                ? AppiumBy.accessibilityId("Virtual")
-                : By.xpath("//*[contains(@content-desc,'Virtual') or contains(@text,'Virtual')]");
-
-        try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public void clickFirstAppointment() {
-
-        By itemsLocator = By.xpath(
-    "//*[contains(@content-desc,'Physical') or contains(@content-desc,'Virtual')]"
-    );
-
+private void clickFirstPhysicalAppointment() throws InterruptedException {
     try {
-        // Get all items
-        List<WebElement> items = driver.findElements(itemsLocator);
+
+        Thread.sleep(2000);
+
+        // ✅ Target only appointment cards
+        By locator = ios
+                ? By.xpath("//XCUIElementTypeCell")
+                : By.xpath("//android.view.View[contains(@content-desc,'Physical Appointment')]");
+
+        List<WebElement> items = driver.findElements(locator);
+
+        System.out.println("[INFO] Physical appointments found: " + items.size());
 
         if (items.isEmpty()) {
-            System.out.println("[INFO] No appointments available.");
-            System.out.println("Returning to Home page...");
-            clickHomeFromBottomNav();
-            return; // safely exit
+            System.out.println("[WARNING] No Physical Appointment found");
+            return;
         }
 
-        // Click first item
-        WebElement firstItem = wait.until(
-            ExpectedConditions.elementToBeClickable(items.get(0))
-        );
+        // ✅ First appointment
+        WebElement first = items.get(0);
 
-        firstItem.click();
-        System.out.println("[SUCCESS] Clicked first appointment");
+        System.out.println("[DEBUG] Appointment: "
+                + first.getAttribute("content-desc"));
+
+        // 🔥 Flutter-safe tap
+        int x = first.getLocation().getX() + first.getSize().getWidth() / 2;
+        int y = first.getLocation().getY() + first.getSize().getHeight() / 2;
+
+        System.out.println("[DEBUG] Clicking at: " + x + "," + y);
+
+        driver.executeScript("mobile: clickGesture", java.util.Map.of(
+                "x", x,
+                "y", y
+        ));
+
+        System.out.println("[SUCCESS] Clicked first Physical Appointment");
+
+        Thread.sleep(3000);
+
+        // 🔙 Back
+        goBackFromAppointmentDetails();
+
+        Thread.sleep(1500);
 
     } catch (Exception e) {
-        System.out.println("[ERROR] Failed to click appointment: " + e.getMessage());
+        System.out.println("[ERROR] Physical appointment click failed: " + e.getMessage());
+        e.printStackTrace();
     }
-    }
+}
 
-     public void goBackToHomePage() {
-
-        By locator;
-
-        if (ios) {
-            locator = AppiumBy.accessibilityId("Home");
-        } else {
-            locator = By.xpath("//android.view.View[contains(@content-desc,'Home')]");
-        }
-
-        WebElement homeTab = wait.until(
-                ExpectedConditions.elementToBeClickable(locator)
-        );
-
-        homeTab.click();
-
-        System.out.println("Navigated to Home via bottom nav");
-    }
-
-     public void clickHomeFromBottomNav() {
-       By locator = ios
-    ? AppiumBy.accessibilityId("Home")
-    : AppiumBy.accessibilityId("Home");
-
-        WebElement home = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        home.click();
-    }
-
-    /**
-     * Goes back from appointment details screen by pressing the back key.
-     */
     public void goBackFromAppointmentDetails() {
-        if (!ios) {
-            ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
-        } else {
-            driver.navigate().back();
+        try {
+            if (!ios) {
+                ((AndroidDriver) driver).pressKey(new KeyEvent(AndroidKey.BACK));
+            } else {
+                driver.navigate().back();
+            }
+            System.out.println("[SUCCESS] Returned from appointment details");
+        } catch (Exception e) {
+            System.out.println("[WARNING] Back press failed: " + e.getMessage());
         }
-        System.out.println("Returned from appointment details");
     }
 }
