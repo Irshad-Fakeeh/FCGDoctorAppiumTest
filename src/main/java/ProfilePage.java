@@ -118,7 +118,25 @@ public class ProfilePage {
     }
 
     public void closeScreenModeDialog() {
-        pressBack();
+        try {
+            // Only press BACK if the theme options are still on screen
+            // (selecting a theme may auto-dismiss the dialog)
+            By dialogCheck = ios
+                    ? AppiumBy.accessibilityId("theme_dark")
+                    : By.xpath("//*[contains(@content-desc,'theme_dark') or contains(@content-desc,'theme_device') or contains(@content-desc,'theme_light')]");
+
+            java.util.List<WebElement> opts = driver.findElements(dialogCheck);
+            if (!opts.isEmpty()) {
+                System.out.println("[INFO] Screen mode dialog still open — pressing BACK to close");
+                pressBack();
+                Thread.sleep(1000);
+                System.out.println("[SUCCESS] Screen mode dialog closed");
+            } else {
+                System.out.println("[INFO] Screen mode dialog already dismissed — skipping BACK");
+            }
+        } catch (Exception e) {
+            System.out.println("[WARNING] closeScreenModeDialog failed: " + e.getMessage());
+        }
     }
 
     public void clickPrivacyPolicy() {
@@ -171,18 +189,94 @@ public class ProfilePage {
         closeLanguageDialog();
         Thread.sleep(2000);
 
+        // Screen Mode — select Dark, close, then restore Device
         clickScreenMode();
-        System.out.println("[INFO] Opened screen mode dialog...");
+        System.out.println("[INFO] Opened screen mode dialog (Dark)...");
         Thread.sleep(2000);
         selectDarkTheme();
+        Thread.sleep(1500);
+        closeScreenModeDialog();
         Thread.sleep(2000);
 
         clickScreenMode();
+        System.out.println("[INFO] Opened screen mode dialog (Device)...");
         Thread.sleep(2000);
         selectDeviceTheme();
-        Thread.sleep(2000);
+        Thread.sleep(1500);
         closeScreenModeDialog();
+        Thread.sleep(2000);
+
+        performManualScrollDown();
+        clickLogout();
+        Thread.sleep(2000);
+        confirmLogout();
 
         System.out.println("[INFO] Profile test sequence completed.");
+    }
+
+        private void performManualScrollDown() {
+        if (ios) return;
+        try {
+            int width = driver.manage().window().getSize().getWidth();
+            int height = driver.manage().window().getSize().getHeight();
+            driver.executeScript("mobile: swipeGesture", java.util.Map.of(
+                    "left",      width / 4,
+                    "top",       (int)(height * 0.2),
+                    "width",     width / 2,
+                    "height",    (int)(height * 0.6),
+                    "direction", "up",
+                    "percent",   0.9,
+                    "speed",     800));
+            System.out.println("[DEBUG] Scroll executed");
+        } catch (Exception e) {
+            System.out.println("[WARNING] Scroll failed: " + e.getMessage());
+        }
+    }
+
+    public void confirmLogout() {
+        try {
+            System.out.println("[STEP] Looking for logout confirmation dialog...");
+            By locator = ios
+                    ? AppiumBy.accessibilityId("Yes")
+                    : By.xpath("//*[contains(@content-desc,'Yes') or contains(@text,'Yes')]");
+
+            java.util.List<WebElement> found = driver.findElements(locator);
+            if (found.isEmpty()) {
+                System.out.println("[INFO] No confirmation dialog found — skipping");
+                return;
+            }
+            WebElement yes = found.get(0);
+            int x = yes.getLocation().getX() + yes.getSize().getWidth() / 2;
+            int y = yes.getLocation().getY() + yes.getSize().getHeight() / 2;
+            System.out.println("[DEBUG] Tapping Yes at (" + x + ", " + y + ")");
+            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+            System.out.println("[SUCCESS] Confirmed logout — tapped Yes");
+        } catch (Exception e) {
+            System.out.println("[WARNING] confirmLogout failed: " + e.getMessage());
+        }
+    }
+
+    public void clickLogout() {
+        try {
+            System.out.println("[STEP] Clicking Logout...");
+            By locator = ios
+                    ? AppiumBy.accessibilityId("Logout")
+                    : By.xpath("//*[contains(@content-desc,'Log Out') or contains(@content-desc,'logout') or contains(@content-desc,'Log Out') or contains(@text,'Logout') or contains(@text,'Log Out')]");
+
+            java.util.List<WebElement> found = driver.findElements(locator);
+            if (found.isEmpty()) {
+                System.out.println("[WARNING] Logout button not found — skipping");
+                return;
+            }
+            WebElement btn = found.get(0);
+            int x = btn.getLocation().getX() + btn.getSize().getWidth() / 2;
+            int y = btn.getLocation().getY() + btn.getSize().getHeight() / 2;
+            System.out.println("[DEBUG] Tapping Logout at (" + x + ", " + y + ")");
+            driver.executeScript("mobile: clickGesture", java.util.Map.of("x", x, "y", y));
+            System.out.println("[SUCCESS] Logout tapped");
+            Thread.sleep(3000);
+        } catch (Exception e) {
+            System.out.println("[WARNING] Logout failed: " + e.getMessage());
+        }
     }
 }
