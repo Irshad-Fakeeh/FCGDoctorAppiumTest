@@ -1,10 +1,13 @@
+dischargeSummary\DischargeSummaryEditPage.class
 AppiumDriverFactory.class
 SchedulePage.class
 SurgicalRecordsPage.class
 ProfilePage.class
 CurrentInPatientPage.class
+dischargeSummary\DischargeSummaryList.class
 ClinicalNotesPage.class
 CurrentMedicationPage.class
+CurrentInpatientsPage.class
 HighcarePage.class
 LabPage.class
 CriticalOutPatientPage.class

@@ -6,6 +6,7 @@ import io.appium.java_client.ios.options.XCUITestOptions;
 import java.time.Duration;
 
 import java.net.URL;
+import java.time.Duration;
 
 public final class AppiumDriverFactory {
 
@@ -35,6 +36,10 @@ public final class AppiumDriverFactory {
         options.setAppPackage(ANDROID_APP_PACKAGE);
         options.setAppActivity(ANDROID_APP_ACTIVITY);
         options.setNoReset(false);
+        options.setAppWaitActivity("*");
+        options.setAutoGrantPermissions(true);
+        options.setDisableWindowAnimation(true);
+        options.setUiautomator2ServerLaunchTimeout(Duration.ofSeconds(90));
 
         // ✅ ADD THESE (VERY IMPORTANT)
         options.setNewCommandTimeout(Duration.ofSeconds(300));

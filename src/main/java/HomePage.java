@@ -23,21 +23,88 @@ public class HomePage {
                 ? AppiumBy.accessibilityId("profile_image")
                 : By.xpath("(//android.view.View[contains(@content-desc,'Welcome Back')]//android.widget.ImageView)[1]");
 
-        WebElement avatar = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        avatar.click();
+        try {
+            WebElement avatar = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            avatar.click();
+        } catch (Exception e) {
+            System.err.println("\n============== APP UI DUMP ON HOME PAGE FAIL ==============");
+            System.err.println("Driver could not find the 'profile_avatar' element! Printing layout to see what screen we are actually on:");
+            System.err.println("Printing getPageSource() is disabled to prevent uiAutomator crashes.");
+            System.err.println("=============================================================\n");
+            throw e;
+        }
     }
 
-    // 🔹 View All
-    public void clickViewAll() {
-        By locator = By.xpath("//*[@content-desc='View All']");
-
-        WebElement viewAll = wait.until(ExpectedConditions.elementToBeClickable(locator));
-        viewAll.click();
-
-        System.out.println("Clicked View All successfully");
+    /**
+     * Taps the Discharge tab.
+     */
+    public void clickDischargeTab() {
+        System.out.println("Navigating to Home and waiting for UI to stabilize (5s)...");
+        try { Thread.sleep(5000); } catch (InterruptedException ignored) {} // EXTENDED BUFFER FOR STABILITY
+        
+        // Primary: Find by description. 
+        // Fallback: Click the 3rd icon on the bottom nav if description fails.
+        By descriptionLocator = ios ? AppiumBy.accessibilityId("Discharge") 
+                                     : AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"Discharge\")");
+        
+        By instanceLocator = AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.ImageView\").instance(3)");
+        
+        try {
+            WebElement tab;
+            try {
+                tab = wait.until(ExpectedConditions.elementToBeClickable(descriptionLocator));
+            } catch (Exception e) {
+                System.out.println("Description-based search failed or timed out. Trying instance-based fallback...");
+                tab = wait.until(ExpectedConditions.elementToBeClickable(instanceLocator));
+            }
+            tab.click();
+            System.out.println("Discharge tab clicked successfully!");
+        } catch (Exception e) {
+            System.err.println("\n============== APP UI DUMP ON DISCHARGE TAB CLICK FAIL ==============");
+            System.err.println("Driver could not find the Discharge tab! (Both description and instance failed)");
+            System.err.println("Printing getPageSource() is disabled to prevent uiAutomator crashes.");
+            System.err.println("======================================================================\n");
+            throw e;
+        }
     }
 
-    // 🔹 Bottom Nav - Schedule
+    /**
+     * Checks if the notifications screen is visible.
+     */
+    public boolean isNotificationsScreenVisible() {
+        By locator = AppiumBy.accessibilityId("Notifications");
+
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Taps the Home tab (first icon in bottom navigation).
+     */
+    public void clickHomeTab() {
+        System.out.println("Clicking Home Tab...");
+        By locator = ios ? AppiumBy.accessibilityId("Home") 
+                         : AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"Home\")");
+        
+        try {
+            WebElement tab = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            tab.click();
+        } catch (Exception e) {
+            System.err.println("Description-based Home Tab search failed. Trying instance fallback (usually instance 2 or 3)...");
+            try {
+                // Instance 0 is usually the profile avatar, so we skip it.
+                driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.ImageView\").instance(2)")).click();
+            } catch (Exception e2) {
+                throw e;
+            }
+        }
+    }
+
+     // 🔹 Bottom Nav - Schedule
     public void clickScheduleFromBottomNav() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Schedule")
@@ -57,7 +124,31 @@ public class HomePage {
         home.click();
     }
 
-    // 🔹 Toggle Weekly / Monthly
+    /**
+     * Taps the Current Inpatients module on the dashboard.
+     */
+    public void clickCurrentInpatients() {
+        System.out.println("Clicking Current Inpatients module...");
+        By locator = ios ? AppiumBy.accessibilityId("Current Inpatients") 
+                         : AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"Current Inpatients\")");
+        
+        try {
+            WebElement card = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            card.click();
+            System.out.println("Current Inpatients clicked successfully!");
+        } catch (Exception e) {
+            System.err.println("Could not find 'Current Inpatients' card. Trying backup locator...");
+            try {
+                WebElement card = wait.until(ExpectedConditions.elementToBeClickable(
+                    AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.ImageView\").descriptionContains(\"Current\")")));
+                card.click();
+            } catch (Exception e2) {
+                throw e;
+            }
+        }
+    }
+
+      // 🔹 Toggle Weekly / Monthly
     public void toggleAppointmentChartView() {
         By locator = ios
                 ? AppiumBy.accessibilityId("Weekly")
