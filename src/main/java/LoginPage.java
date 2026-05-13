@@ -125,6 +125,99 @@ public class LoginPage {
         }
         loginBtn.click();
         System.out.println("Login button clicked! Waiting for Home screen...");
+        
+        // Handle possible Samsung Biometric/PIN popup
+        handleSamsungBiometricPopup();
+    }
+    
+    private void handleSamsungBiometricPopup() {
+        System.out.println("Checking for App-level Biometrics activation prompt...");
+        try {
+            By activateBtnLocator = AppiumBy.accessibilityId("Activate Biometrics/PIN");
+            // Wait up to 10 seconds for the app-level prompt
+            WebElement activateBtn = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.elementToBeClickable(activateBtnLocator));
+            
+            System.out.println("App-level Biometrics prompt detected. Clicking 'Activate Biometrics/PIN'...");
+            activateBtn.click();
+            try { Thread.sleep(2000); } catch (Exception ignored) {}
+        } catch (Exception e) {
+            System.out.println("No App-level Biometrics prompt detected. Proceeding to check system prompt...");
+        }
+
+        System.out.println("Checking for Samsung Biometric PIN popup...");
+        try {
+            By biometricLayoutLocator = AppiumBy.id("com.samsung.android.biometrics.app.setting:id/id_prompt_edit_layout");
+            // Wait up to 10 seconds for the popup
+            WebElement biometricLayout = new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until(ExpectedConditions.visibilityOfElementLocated(biometricLayoutLocator));
+            
+            System.out.println("Biometric PIN popup detected. Entering PIN: 112233...");
+            
+            // Try to find the EditText within the layout
+            java.util.List<WebElement> editTexts = driver.findElements(AppiumBy.className("android.widget.EditText"));
+            if (!editTexts.isEmpty()) {
+                System.out.println("Found EditText, trying sendKeys...");
+                WebElement pinField = editTexts.get(0);
+                pinField.click();
+                try { Thread.sleep(500); } catch (Exception ignored) {}
+                pinField.sendKeys("112233");
+            } else {
+                System.out.println("No EditText found, attempting to find on-screen number buttons...");
+                try {
+                    // Tap 1, 1, 2, 2, 3, 3
+                    String[] pinSequence = {"1", "1", "2", "2", "3", "3"};
+                    for (String digit : pinSequence) {
+                        WebElement numBtn = driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"" + digit + "\")"));
+                        numBtn.click();
+                        Thread.sleep(200);
+                    }
+                } catch (Exception e) {
+                    System.out.println("On-screen buttons not found. Attempting hardware key events...");
+                    if (driver instanceof io.appium.java_client.android.AndroidDriver) {
+                        io.appium.java_client.android.AndroidDriver androidDriver = (io.appium.java_client.android.AndroidDriver) driver;
+                        androidDriver.pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.DIGIT_1));
+                        androidDriver.pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.DIGIT_1));
+                        androidDriver.pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.DIGIT_2));
+                        androidDriver.pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.DIGIT_2));
+                        androidDriver.pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.DIGIT_3));
+                        androidDriver.pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.DIGIT_3));
+                    }
+                }
+            }
+            
+            System.out.println("PIN entered. Looking for 'OK' or 'Done' button...");
+            
+            String[] submitLocators = {
+                "new UiSelector().textMatches(\"(?i)OK\")",
+                "new UiSelector().textMatches(\"(?i)DONE\")",
+                "new UiSelector().descriptionMatches(\"(?i)OK\")"
+            };
+            
+            boolean clicked = false;
+            for (String selector : submitLocators) {
+                try {
+                    WebElement btn = driver.findElement(AppiumBy.androidUIAutomator(selector));
+                    if (btn.isDisplayed()) {
+                        btn.click();
+                        System.out.println("Clicked submit button using: " + selector);
+                        clicked = true;
+                        break;
+                    }
+                } catch (Exception ignored) {}
+            }
+            
+            if (!clicked) {
+                System.out.println("No visible OK button found, attempting to press ENTER key on device...");
+                if (driver instanceof io.appium.java_client.android.AndroidDriver) {
+                    ((io.appium.java_client.android.AndroidDriver) driver).pressKey(new io.appium.java_client.android.nativekey.KeyEvent(io.appium.java_client.android.nativekey.AndroidKey.ENTER));
+                }
+            }
+            
+            System.out.println("Biometric handling complete.");
+        } catch (Exception e) {
+            System.out.println("No Biometric PIN popup appeared or timeout reached. Continuing...");
+        }
     }
 
     private void fillIosLogin(String employeeId, String passwordText) {

@@ -49,7 +49,8 @@ public class DischargeSummaryList {
     public void clickAuthorizedTab() {
         try { Thread.sleep(2000); } catch (InterruptedException ignored) {} // Settle time
         // Using a more robust locator for the toggle that doesn't strictly depend on newline character
-        By toggleLocator = AppiumBy.androidUIAutomator("new UiSelector().descriptionMatches(\"(?i)Unauthorized.*Authorized\")");
+        // More robust locator: matches if both are present, or just one, ignoring case and spacing
+        By toggleLocator = AppiumBy.androidUIAutomator("new UiSelector().descriptionMatches(\"(?i).*(Unauthorized|Authorized).*\")");
         WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(toggleLocator));
         int x = toggle.getLocation().getX() + (int) (toggle.getSize().getWidth() * 0.75);
         int y = toggle.getLocation().getY() + (toggle.getSize().getHeight() / 2);
@@ -61,7 +62,8 @@ public class DischargeSummaryList {
      */
     public void clickUnauthorizedTab() {
         try { Thread.sleep(2000); } catch (InterruptedException ignored) {} // Settle time
-        By toggleLocator = AppiumBy.androidUIAutomator("new UiSelector().descriptionMatches(\"(?i)Unauthorized.*Authorized\")");
+        // More robust locator: matches if both are present, or just one, ignoring case and spacing
+        By toggleLocator = AppiumBy.androidUIAutomator("new UiSelector().descriptionMatches(\"(?i).*Unauthorized.*Authorized.*|(?i).*Authorized.*Unauthorized.*\")");
         WebElement toggle = wait.until(ExpectedConditions.elementToBeClickable(toggleLocator));
         int x = toggle.getLocation().getX() + (int) (toggle.getSize().getWidth() * 0.25);
         int y = toggle.getLocation().getY() + (toggle.getSize().getHeight() / 2);
@@ -245,12 +247,61 @@ public class DischargeSummaryList {
                             break;
                         }
                         
-                        // PRIMARY NAVIGATION: Swipe Calendar Body
-                        // For simplicity, we swipe backwards. If target is in the past, swipe DOWN.
-                        // If target is in the future, we would swipe UP. 
-                        // But historically the app starts at current date, so swipe back is usually needed.
-                        System.out.println("Performing Calendar Swipe...");
-                        performCalendarSwipe(false); 
+                        // Determine direction
+                        boolean goBack = true; // default
+                        try {
+                            String[] currentParts = currentDesc.split(" ");
+                            if (currentParts.length >= 2) {
+                                String currentMonthStr = currentParts[0];
+                                int currentYearInt = Integer.parseInt(currentParts[1].trim());
+                                int currentMonthIdx = java.util.Arrays.asList(monthAbbrs).indexOf(currentMonthStr);
+                                int targetMonthIdx = java.util.Arrays.asList(monthAbbrs).indexOf(targetMonth);
+                                
+                                if (Integer.parseInt(targetYear) > currentYearInt) {
+                                    goBack = false;
+                                } else if (Integer.parseInt(targetYear) == currentYearInt && targetMonthIdx > currentMonthIdx) {
+                                    goBack = false;
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.out.println("Could not parse current header for direction, defaulting to goBack=true");
+                        }
+
+                        // PRIMARY NAVIGATION: Try finding the Prev/Next buttons
+                        System.out.println("Attempting to click " + (goBack ? "Previous" : "Next") + " month button...");
+                        boolean buttonClicked = false;
+                        java.util.List<WebElement> buttons = driver.findElements(AppiumBy.className("android.widget.Button"));
+                        int headerX = header.getLocation().getX();
+                        
+                        WebElement targetBtn = null;
+                        for (WebElement btn : buttons) {
+                            int btnX = btn.getLocation().getX();
+                            if (goBack && btnX < headerX) {
+                                targetBtn = btn;
+                                break;
+                            } else if (!goBack && btnX > headerX) {
+                                targetBtn = btn;
+                                break;
+                            }
+                        }
+                        
+                        if (targetBtn != null) {
+                            targetBtn.click();
+                            Thread.sleep(1200);
+                            String newDescCheck = driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"20\")")).getAttribute("content-desc");
+                            if (newDescCheck != null && !newDescCheck.equals(currentDesc)) {
+                                System.out.println("Navigation Successful via Button! Header updated to: " + newDescCheck);
+                                continue;
+                            } else {
+                                System.out.println("Button click did not change header.");
+                            }
+                        } else {
+                            System.out.println("Could not find matching button for direction.");
+                        }
+
+                        // SECONDARY NAVIGATION: Horizontal Swipe
+                        System.out.println("Falling back to Horizontal Calendar Swipe...");
+                        performHorizontalSwipe(goBack); 
                         Thread.sleep(1500);
 
                         // Check if text changed
@@ -260,15 +311,17 @@ public class DischargeSummaryList {
                             continue; 
                         }
 
-                        // SECONDARY NAVIGATION: Sweep Tap
+                        System.out.println("Month interaction failed. Attempting Sweep Tap Fallback...");
                         int startX = header.getLocation().getX();
                         int centerY = header.getLocation().getY() + (header.getSize().getHeight() / 2);
-                        int[] offsets = {-60, -120, -200}; 
+                        int[] offsets = goBack ? new int[]{-60, -120, -200} : new int[]{60, 120, 200}; 
                         boolean headerChanged = false;
                         
                         for (int offset : offsets) {
                             int tapX = startX + offset;
                             if (tapX < 50) tapX = 100;
+                            int w = driver.manage().window().getSize().getWidth();
+                            if (tapX > w - 50) tapX = w - 100;
                             
                             System.out.println("Sweep Tap: offset=" + offset + " at (" + tapX + ", " + centerY + ")");
                             tapCoordinate(tapX, centerY);
@@ -276,21 +329,14 @@ public class DischargeSummaryList {
                             
                             String newDescCheck = driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"20\")")).getAttribute("content-desc");
                             if (newDescCheck != null && !newDescCheck.equals(currentDesc)) {
-                                System.out.println("Navigation Successful! Header updated to: " + newDescCheck);
+                                System.out.println("Navigation Successful via Sweep Tap! Header updated to: " + newDescCheck);
                                 headerChanged = true;
                                 break;
                             }
                         }
                         
                         if (!headerChanged) {
-                            System.out.println("Month interaction failed. Attempting Year-Picker Fallback...");
-                            header.click();
-                            Thread.sleep(1500);
-                            try {
-                                WebElement yearTarget = driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"" + targetYear + "\")"));
-                                yearTarget.click();
-                                Thread.sleep(1500);
-                            } catch (Exception ignored) {}
+                            System.err.println("All month interaction attempts failed for this iteration.");
                         }
                     } catch (Exception e) {
                         System.err.println("Navigation loop error: " + e.getMessage());
@@ -405,25 +451,25 @@ public class DischargeSummaryList {
         try { Thread.sleep(1500); } catch (Exception ignored) {}
     }
 
-    private void performCalendarSwipe(boolean up) {
+    private void performHorizontalSwipe(boolean goBack) {
         int width = driver.manage().window().getSize().getWidth();
         int height = driver.manage().window().getSize().getHeight();
         
-        // Target middle of screen for calendar body
-        int startX = width / 2;
-        int startY = (int) (height * 0.6);
-        int endY = (int) (height * 0.4);
+        int startY = (int) (height * 0.5); // middle of screen
         
-        if (!up) { // To go back, we swipe DOWN (finger moves Y small to big)
-            startY = (int) (height * 0.4);
-            endY = (int) (height * 0.7);
+        int startX = (int) (width * 0.8);
+        int endX = (int) (width * 0.2);
+        
+        if (goBack) { // To go to previous month, swipe right (finger moves left to right)
+            startX = (int) (width * 0.2);
+            endX = (int) (width * 0.8);
         }
 
         PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
         Sequence swipe = new Sequence(finger, 1);
         swipe.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), startX, startY));
         swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
-        swipe.addAction(finger.createPointerMove(Duration.ofMillis(1000), PointerInput.Origin.viewport(), startX, endY));
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(600), PointerInput.Origin.viewport(), endX, startY));
         swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
         driver.perform(Collections.singletonList(swipe));
     }

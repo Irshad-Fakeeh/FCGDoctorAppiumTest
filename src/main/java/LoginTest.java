@@ -152,6 +152,64 @@ public class LoginTest {
             Thread.sleep(2000);
         }
         
+        // --- CURRENT INPATIENTS WORKFLOW ---
+        System.out.println("Starting Current Inpatients verification workflow...");
+        
+        // 1. Navigate back from Discharge Summary List to Home Screen
+        System.out.println("Navigating back to Home Screen...");
+        homePage.clickHomeTab();
+        Thread.sleep(5000); // 5s for dashboard to load
+
+        // 2. Click Current Inpatients
+        homePage.clickCurrentInpatients();
+        CurrentInpatientsPage inpatientsPage = new CurrentInpatientsPage(driver, wait, "ios".equals(platform));
+        Thread.sleep(5000); // Wait for list to load
+
+        // 3. Check if list is empty
+        if (inpatientsPage.isListEmpty()) {
+            System.out.println("Current Inpatients list is empty. Returning to Home Screen...");
+            inpatientsPage.goBack();
+        } else {
+            System.out.println("Current Inpatients list found. Searching for patient with medications...");
+            boolean medicationFound = false;
+            
+            // Try checking the first 5 patient cards
+            for (int i = 0; i < 5; i++) {
+                System.out.println("Inspecting patient card index " + i + "...");
+                if (inpatientsPage.clickPatientCard(i)) {
+                    Thread.sleep(3000);
+                    
+                    System.out.println("Clicking View EMR...");
+                    inpatientsPage.clickViewEMR();
+                    Thread.sleep(4000); // Wait for EMR to load
+                    
+                    if (inpatientsPage.isMedicationPresent()) {
+                        System.out.println("SUCCESS: Medication found! Opening medication details...");
+                        inpatientsPage.clickMedication();
+                        medicationFound = true;
+                        Thread.sleep(4000);
+                        break; // Exit loop once found
+                    } else {
+                        System.out.println("No medication found for this patient. Returning to list to check another card...");
+                        // Navigate back: EMR -> Patient Details -> Current Inpatients List
+                        inpatientsPage.goBack(); 
+                        Thread.sleep(2000);
+                        inpatientsPage.goBack();
+                        Thread.sleep(3000);
+                    }
+                } else {
+                    System.out.println("Reached end of visible patient list or card not clickable.");
+                    break;
+                }
+            }
+            
+            if (!medicationFound) {
+                System.out.println("Finished checking available patients. No medication lists found.");
+                System.out.println("Returning to Home Screen...");
+                inpatientsPage.goBack();
+            }
+        }
+        
         System.out.println("Full comprehensive test sequence completed! Session remains open for further inspection.");
     }
 }

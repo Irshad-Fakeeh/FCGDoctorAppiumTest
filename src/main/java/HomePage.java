@@ -85,4 +85,50 @@ public class HomePage {
             return false;
         }
     }
+
+    /**
+     * Taps the Home tab (first icon in bottom navigation).
+     */
+    public void clickHomeTab() {
+        System.out.println("Clicking Home Tab...");
+        By locator = ios ? AppiumBy.accessibilityId("Home") 
+                         : AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"Home\")");
+        
+        try {
+            WebElement tab = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            tab.click();
+        } catch (Exception e) {
+            System.err.println("Description-based Home Tab search failed. Trying instance fallback (usually instance 2 or 3)...");
+            try {
+                // Instance 0 is usually the profile avatar, so we skip it.
+                driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.ImageView\").instance(2)")).click();
+            } catch (Exception e2) {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Taps the Current Inpatients module on the dashboard.
+     */
+    public void clickCurrentInpatients() {
+        System.out.println("Clicking Current Inpatients module...");
+        By locator = ios ? AppiumBy.accessibilityId("Current Inpatients") 
+                         : AppiumBy.androidUIAutomator("new UiSelector().descriptionContains(\"Current Inpatients\")");
+        
+        try {
+            WebElement card = wait.until(ExpectedConditions.elementToBeClickable(locator));
+            card.click();
+            System.out.println("Current Inpatients clicked successfully!");
+        } catch (Exception e) {
+            System.err.println("Could not find 'Current Inpatients' card. Trying backup locator...");
+            try {
+                WebElement card = wait.until(ExpectedConditions.elementToBeClickable(
+                    AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.ImageView\").descriptionContains(\"Current\")")));
+                card.click();
+            } catch (Exception e2) {
+                throw e;
+            }
+        }
+    }
 }
