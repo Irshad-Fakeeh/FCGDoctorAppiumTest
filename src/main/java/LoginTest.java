@@ -193,14 +193,23 @@ public class LoginTest {
             driver.navigate().back(); // Nav back to list if we skipped
             Thread.sleep(2000);
         }
-        
+
+        // Discharge summary flow complete — press back to exit the section
+        // System.out.println("Discharge summary flow completed. Pressing back to continue...");
+        // driver.navigate().back();
+        // Thread.sleep(2000);
 
         // Navigate to notifications, test, then return to Home
-         System.out.println("Navigating to Notifications Screen...");
+        System.out.println("Navigating to Notifications Screen...");
         NotificationsPage notificationsPage = new NotificationsPage(driver, wait, "ios".equals(platform));
         notificationsPage.testNotifications();
-        // testNotifications() ends by navigating to Home via bottom nav
         Thread.sleep(3000);
+
+        // testNotifications() does not auto-navigate back to Home (goBackToHomePage is commented out).
+        // Explicitly return home so clickProfileAvatar() can find the avatar on the Home screen.
+        System.out.println("Returning to Home screen after notifications...");
+        homePage.clickHomeTab();
+        Thread.sleep(2000);
 
         // Profile flow — click avatar from Home
         System.out.println("Navigating to Profile...");

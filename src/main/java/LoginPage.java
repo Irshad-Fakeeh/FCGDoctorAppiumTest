@@ -105,12 +105,19 @@ public class LoginPage {
         // Use Button class instead of instance(1) to be more specific and stable
         By loginBtnLocator = AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.Button\").descriptionContains(\"Log In\")");
         
+        // Dismiss keyboard by tapping an empty area at the top of the screen.
+        // hideKeyboard() is intentionally avoided: it sends a raw ADB command that
+        // can crash the Flutter engine's input system on some devices.
         try {
-            if (driver instanceof io.appium.java_client.HidesKeyboard) {
-                ((io.appium.java_client.HidesKeyboard) driver).hideKeyboard();
-                System.out.println("Keyboard hidden. Waiting for UI to settle...");
-                Thread.sleep(3000); // Increased wait time to prevent UI resize crash
-            }
+            int screenWidth = driver.manage().window().getSize().getWidth();
+            PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+            Sequence tap = new Sequence(finger, 1);
+            tap.addAction(finger.createPointerMove(Duration.ZERO, PointerInput.Origin.viewport(), screenWidth / 2, 80));
+            tap.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+            tap.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+            driver.perform(Collections.singletonList(tap));
+            System.out.println("Keyboard dismissed via tap. Waiting for UI to settle...");
+            Thread.sleep(1500);
         } catch (Exception ignored) {}
 
         WebElement loginBtn = null;
